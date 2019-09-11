@@ -4,12 +4,16 @@
         <script id="vertex-shader" type="x-shader/x-vertex">
             attribute vec4 a_Position;
             attribute vec4 a_Color;
+            uniform float u_Rotation;
             
             varying vec4 v_Color;
             void main()
             {
-                gl_Position = a_Position;
-                gl_PointSize = 9.0;
+                // x = -sin(0) * 0.5 + cos(0) * 0.0 -> -0 + 1 * 0 = 0.0
+                // y = sim(0) * 0.0 + cos(0) * 0.5 -> 0 * 0 + 1 * 0.5 = 0.5 
+                gl_Position.x = -sin(u_Rotation) * a_Position.x + cos(u_Rotation) * a_Position.y;
+                gl_Position.y = sin(u_Rotation) * a_Position.y + cos(u_Rotation) * a_Position.x;
+                gl_Position.zw = a_Position.zw;
                 v_Color = a_Color;
             }
         </script>
