@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html><body>
+        <canvas id="c" width="200px" height="200px"></canvas><br/>
+        <button id="clearButton">Clear Canvas</button>
+        <script id="vertex-shader" type="x-shader/x-vertex">
+            attribute vec4 a_Position;
+            void main()
+            {
+                gl_Position = a_Position;
+                gl_PointSize = 10.0;
+            }
+        </script>
+        <script id="fragment-shader" type="x-shader/x-fragment">
+            precision mediump float;
+            void main()
+            {
+                gl_FragColor = vec4( 1.0, 0.0, 0.0, 1.0 );
+            }
+        </script>
+        <script type="text/javascript" src="initShaders.js"></script>
+        <script type="text/javascript" src="MV.js"></script>
+        <script type="text/javascript" src="angel\webgl-utils.js"></script>
+        <script type="text/javascript" src="code02p2.js"></script>
+</body></html>
