@@ -1,5 +1,5 @@
 var Renderer = {
-
+    
     /**
      * @type {WebGLRenderingContext}
      */
@@ -49,6 +49,7 @@ var Renderer = {
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
         this.gl.bufferData(this.gl.ARRAY_BUFFER, this.bufferSize, this.gl.STATIC_DRAW);
         this.vertices = [];
+        this.colors = [];
     },
     OnClick : function()
     {
@@ -121,7 +122,7 @@ colorPicker.addEventListener("click", function() {
             Renderer.drawColor = vec4(1, 0, 0, 1);
             break;
         case 2:
-            Renderer.drawColor = vec4(1, 1, 0, 1);
+            Renderer.drawColor = vec4(1, 0.5, 0, 1);
             break;
     }
 });
