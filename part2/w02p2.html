@@ -1,20 +1,48 @@
 <!DOCTYPE html>
 <html><body>
-        <canvas id="c" width="200px" height="200px"></canvas><br/>
-        <button id="clearButton">Clear Canvas</button>
+        <div style="display: flex;">
+            <div style="width: 200px">
+                <canvas id="c" width="200px" height="200px"></canvas>
+            </div>
+            <div style="flex-grow: 1;">
+                <b>Background</b>
+                <br>
+                <select id="colorMenu" size="3">
+                    <option value="0">Black</option>
+                    <option value="1">Blue</option>
+                    <option value="2">Green</option>
+                </select>
+                <br>
+                <br>
+                <b>Draw Color</b>
+                <br>
+                <select id="colorPicker" size="3">
+                    <option value="0">Black</option>
+                    <option value="1">Red</option>
+                    <option value="2">Orange</option>
+                </select>
+            </div>
+        </div>
+        <br/> <button id="clearButton">Clear Canvas</button>
         <script id="vertex-shader" type="x-shader/x-vertex">
             attribute vec4 a_Position;
+            attribute vec4 a_Color;            
+
+            varying vec4 v_Color;
             void main()
             {
                 gl_Position = a_Position;
                 gl_PointSize = 10.0;
+                v_Color = a_Color;
+                
             }
         </script>
         <script id="fragment-shader" type="x-shader/x-fragment">
             precision mediump float;
+            varying vec4 v_Color;
             void main()
             {
-                gl_FragColor = vec4( 1.0, 0.0, 0.0, 1.0 );
+                gl_FragColor = v_Color;
             }
         </script>
         <script type="text/javascript" src="initShaders.js"></script>
