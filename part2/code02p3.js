@@ -13,32 +13,43 @@ var Renderer = {
         this.mode = document.getElementById("modePicker");
         this.gl = setupWebGL(this.canvas);
         this.program = initShaders(this.gl, "vertex-shader", "fragment-shader");
-    }
-    ,
+    },
+
     Run : function()
     {
         this.Setup();
-        var gl = this.gl;
 
-        gl.useProgram(this.program);
+        this.gl.useProgram(this.program);
 
-        this.vertices = [vec2(0.0, 0.5), vec2(-0.5, -0.5), vec2(0.5, -0.5)];
-        this.vertexBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, this.bufferSize, gl.STATIC_DRAW);
-        gl.bufferSubData(gl.ARRAY_BUFFER, 0, flatten(this.vertices));
-        var vPos = gl.getAttribLocation(this.program, "a_Position");
-        gl.vertexAttribPointer(vPos, 2, gl.FLOAT, false, 0, 0);
-        gl.enableVertexAttribArray(vPos);
+        this.vertexBuffer = this.gl.createBuffer();
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, this.bufferSize, this.gl.STATIC_DRAW);
+        var vPos = this.gl.getAttribLocation(this.program, "a_Position");
+        this.gl.vertexAttribPointer(vPos, 2, this.gl.FLOAT, false, 0, 0);
+        this.gl.enableVertexAttribArray(vPos);
+        this.vertices = [];
+
+        // Setup index buffers for points
+        this.pointsIndiceBuffer = this.gl.createBuffer(); 
+        this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.pointsIndiceBuffer); 
+        this.gl.bufferData(this.gl.ELEMENT_ARRAY_BUFFER, this.bufferSize, this.gl.STATIC_DRAW);
+        this.pointIndices = [];
+
+        // Setup index buffers for trianthis.gles
+        this.trianthis.gleIndiceBuffer = this.gl.createBuffer(); 
+        this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.trianthis.gleIndiceBuffer); 
+        this.gl.bufferData(this.gl.ELEMENT_ARRAY_BUFFER, this.bufferSize, this.gl.STATIC_DRAW);
+        this.trianthis.gleIndices = [];
+
 
         this.colors = [this.drawColor, this.drawColor, this.drawColor];
-        this.colorBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.colorBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, this.bufferSize, gl.STATIC_DRAW);
-        gl.bufferSubData(gl.ARRAY_BUFFER, 0, flatten(this.colors));
-        var vCol = gl.getAttribLocation(this.program, "a_Color");
-        gl.vertexAttribPointer(vCol, 4, gl.FLOAT, false, 0, 0);
-        gl.enableVertexAttribArray(vCol);
+        this.colorBuffer = this.gl.createBuffer();
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colorBuffer);
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, this.bufferSize, this.gl.STATIC_DRAW);
+        this.gl.bufferSubData(this.gl.ARRAY_BUFFER, 0, flatten(this.colors));
+        var vCol = this.gl.getAttribLocation(this.program, "a_Color");
+        this.gl.vertexAttribPointer(vCol, 4, this.gl.FLOAT, false, 0, 0);
+        this.gl.enableVertexAttribArray(vCol);
 
         button = document.getElementById("clearButton");
         button.addEventListener("click", this.OnClear.bind(this));
@@ -52,13 +63,22 @@ var Renderer = {
     {
        this.ClearCanvas(); 
     },
+
     ClearCanvas : function()
     {
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
         this.gl.bufferData(this.gl.ARRAY_BUFFER, this.bufferSize, this.gl.STATIC_DRAW);
+
+        this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.pointsIndiceBuffer);
+        this.gl.bufferData(this.gl.ELEMENT_ARRAY_BUFFER, this.bufferSize, this.gl.STATIC_DRAW);
+
+        this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.triangleIndiceBuffer);
+        this.gl.bufferData(this.gl.ELEMENT_ARRAY_BUFFER, this.bufferSize, this.gl.STATIC_DRAW);
+
         this.vertices = [];
         this.colors = [];
     },
+
     OnClick : function()
     {
         var boundingRect = event.target.getBoundingClientRect();
@@ -73,9 +93,31 @@ var Renderer = {
 
     AddDot : function(position)
     {
+
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
-        this.gl.bufferSubData(this.gl.ARRAY_BUFFER, sizeof['vec2']*this.vertices.length, flatten(position)); 
-        this.vertices.push(position);
+        var vertexIndex = this.vertices.length;
+        this.gl.bufferSubData(this.gl.ARRAY_BUFFER, sizeof['vec2']*vertexIndex, flatten(position)); 
+        this.vertices.push(vertexIndex);
+
+        this.pointIndices.push(position);
+        this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.pointsIndiceBuffer);
+        if(this.pointIndices.length % 3 == 0)
+        {
+            // Clear the points
+            this.pointIndices = [];
+            this.gl.bufferData(this.gl.ELEMENT_ARRAY_BUFFER, this.bufferSize, this.gl.STATIC_DRAW);
+        }
+        else
+        {
+            var indiceIndex = this.pointIndices.length - 1;
+            this.gl.bufferSubData(this.gl.ELEMENT_ARRAY_BUFFER, indiceIndex, Uint8Array.from([vertexIndex]));
+        }
+       
+        this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.triangleIndiceBuffer);
+        var triangleIndex = this.triangleIndices.length;
+        this.triangleIndices.push(vertexIndex);
+        this.gl.bufferSubData(this.gl.ELEMENT_ARRAY_BUFFER, triangleIndex, Uint8Array.from([vertexIndex])); 
+
 
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colorBuffer);
         this.gl.bufferSubData(this.gl.ARRAY_BUFFER, sizeof['vec4']*this.colors.length, flatten(this.drawColor));
@@ -86,7 +128,12 @@ var Renderer = {
     {
         this.gl.clearColor(this.clearColor[0], this.clearColor[1], this.clearColor[2], this.clearColor[3]);
         this.gl.clear(this.gl.COLOR_BUFFER_BIT);
-        this.gl.drawArrays(this.GetDrawMode(), 0, this.vertices.length);
+        this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.pointsIndiceBuffer); 
+        this.gl.drawElements(this.gl.POINTS, this.pointIndices.length, this.gl.UNSIGNED_BYTE, 0);
+
+        this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.triangleIndiceBuffer); 
+        this.gl.drawElements(this.gl.TRIANGLES, this.triangleIndices.length, this.gl.UNSIGNED_BYTE, 0);
+
         window.requestAnimationFrame(function() {this.Draw()}.bind(this));
     },
     GetDrawMode : function()
