@@ -25,13 +25,14 @@ var Renderer = {
         this.Setup();
         var gl = this.gl;
 
+        gl.enable(gl.DEPTH_TEST);
         gl.useProgram(this.program);
 
         this.vertexBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, this.bufferSize, gl.STATIC_DRAW);
         var vPos = gl.getAttribLocation(this.program, "a_Position");
-        gl.vertexAttribPointer(vPos, 2, gl.FLOAT, false, 0, 0);
+        gl.vertexAttribPointer(vPos, 3, gl.FLOAT, false, 0, 0);
         gl.enableVertexAttribArray(vPos);
         this.vertices = [];
 
@@ -84,8 +85,8 @@ var Renderer = {
         var offset = vec2(boundingRect.width*0.5, boundingRect.height*0.5);
         
         var centeredPos = subtract(pos, offset);
-
-        var normalizedPos = vec2(centeredPos[0] / (0.5*boundingRect.width), -centeredPos[1] / (0.5*boundingRect.height));
+        var z = 1 - 2*((this.vertices.length + 1) / this.bufferSize);
+        var normalizedPos = vec3(centeredPos[0] / (0.5*boundingRect.width), -centeredPos[1] / (0.5*boundingRect.height), z);
         this.AddDot(normalizedPos);
     },
 
@@ -94,7 +95,7 @@ var Renderer = {
 
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
         var vertexIndex = this.vertices.length;
-        this.gl.bufferSubData(this.gl.ARRAY_BUFFER, sizeof['vec2']*vertexIndex, flatten(position)); 
+        this.gl.bufferSubData(this.gl.ARRAY_BUFFER, sizeof['vec3']*vertexIndex, flatten(position)); 
         this.vertices.push(position);
         
         if(this.GetDrawMode() === 2 && (++this.dotCounter) % 3 == 0)
@@ -131,7 +132,7 @@ var Renderer = {
             }
 
             this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
-            this.gl.bufferSubData(this.gl.ARRAY_BUFFER, sizeof['vec2']*startingIndex, flatten(this.vertices.slice(startingIndex))); 
+            this.gl.bufferSubData(this.gl.ARRAY_BUFFER, sizeof['vec3']*startingIndex, flatten(this.vertices.slice(startingIndex))); 
 
             this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colorBuffer);
             this.gl.bufferSubData(this.gl.ARRAY_BUFFER, sizeof['vec4']*startingIndex, flatten(this.colors.slice(startingIndex)));
@@ -155,7 +156,7 @@ var Renderer = {
     Draw : function()
     {
         this.gl.clearColor(this.clearColor[0], this.clearColor[1], this.clearColor[2], this.clearColor[3]);
-        this.gl.clear(this.gl.COLOR_BUFFER_BIT);
+        this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
 
         this.circleIndiceBuffer.Bind();
         this.gl.drawElements(this.gl.TRIANGLE_FAN, this.circleIndiceBuffer.Size(), this.gl.UNSIGNED_BYTE, 0);
