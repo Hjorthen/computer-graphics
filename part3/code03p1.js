@@ -108,7 +108,8 @@ var Renderer = {
 
 
         var mv_matrix = mat4()
-        mv_matrix = mult(mv_matrix, rotateY(30))
+        mv_matrix = mult(mv_matrix, rotateX(-35.26))
+        mv_matrix = mult(mv_matrix, rotateY(45))
         mv_matrix = mult(mv_matrix, scalem(0.5, 0.5, 0.5))
         //mv_matrix = mult(mv_matrix, rotateX(35, 26))
         //mv_matrix = mult(mv_matrix, rotateY(45))
