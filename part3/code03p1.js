@@ -69,8 +69,6 @@ var Renderer = {
             
             4, 7, 6, // Back
             4, 5, 6
-
-
         ];
 
         this.cubeBuffer = new GLBuffer(this.bufferSize, this.gl.ELEMENT_ARRAY_BUFFER, this.gl);
@@ -104,15 +102,12 @@ var Renderer = {
         gl.enableVertexAttribArray(vPos);
         this.vertices = [];
       
-        var cameraPosition = [0, 0, -5];
-
-
         var mv_matrix = mat4()
+        var pm = perspective(45, 1,  2, -2)
+        mv_matrix = mult(mv_matrix, pm);
+        mv_matrix = mult(mv_matrix, translate(0, 0, -10))
         mv_matrix = mult(mv_matrix, rotateX(-35.26))
         mv_matrix = mult(mv_matrix, rotateY(45))
-        mv_matrix = mult(mv_matrix, scalem(0.5, 0.5, 0.5))
-        //mv_matrix = mult(mv_matrix, rotateX(35, 26))
-        //mv_matrix = mult(mv_matrix, rotateY(45))
         var mv = gl.getUniformLocation(this.program, "MV");
         gl.uniformMatrix4fv(mv, false, flatten(mv_matrix));
 
