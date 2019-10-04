@@ -69,8 +69,6 @@ var Renderer = {
             
             4, 7, 6, // Back
             4, 5, 6
-
-
         ];
 
         this.cubeBuffer = new GLBuffer(this.bufferSize, this.gl.ELEMENT_ARRAY_BUFFER, this.gl);
@@ -104,18 +102,9 @@ var Renderer = {
         gl.enableVertexAttribArray(vPos);
         this.vertices = [];
       
-        var cameraPosition = [0, 0, -5];
-
-
-        var mv_matrix = mat4()
-        mv_matrix = mult(mv_matrix, rotateX(-35.26))
-        mv_matrix = mult(mv_matrix, rotateY(45))
-        mv_matrix = mult(mv_matrix, scalem(0.5, 0.5, 0.5))
-        //mv_matrix = mult(mv_matrix, rotateX(35, 26))
-        //mv_matrix = mult(mv_matrix, rotateY(45))
-        var mv = gl.getUniformLocation(this.program, "MV");
-        gl.uniformMatrix4fv(mv, false, flatten(mv_matrix));
-
+        this.MVLocation = gl.getUniformLocation(this.program, "MV")
+        
+        this.SetPerspective(true);
 
         // Setup index buffers for points
         this.pointsIndiceBuffer = new GLBuffer(this.bufferSize, gl.ELEMENT_ARRAY_BUFFER, gl); 
@@ -248,20 +237,50 @@ var Renderer = {
         this.colors.push(color);
         return vertexIndex;
     },
+
+    SetPerspective : function(orth)
+    {
+        var mv = this.gl.getUniformLocation(this.program, "P");
+        var pm = perspective(45, 3,  2, -2)
+        var ort = ortho(-5, 5, -2, 2, -2, 200);
+
+        if(orth)
+        {
+            this.gl.uniformMatrix4fv(mv, false, flatten(ort));
+            console.log("Switched to ortographic view")
+        }
+        else
+        {
+            this.gl.uniformMatrix4fv(mv, false, flatten(pm));
+            console.log("Switched to perspective view")
+        }
+    },
+
     Draw : function()
     {
         //this.gl.clearColor(this.clearColor[0], this.clearColor[1], this.clearColor[2], this.clearColor[3]);
         this.gl.clearColor(0, 0, 0, 0);
         this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
 
-        this.circleIndiceBuffer.Bind();
-        this.gl.drawElements(this.gl.TRIANGLE_FAN, this.circleIndiceBuffer.Size(), this.gl.UNSIGNED_BYTE, 0);
-        this.triangleIndiceBuffer.Bind();
-        this.gl.drawElements(this.gl.TRIANGLES, this.triangleIndiceBuffer.Size(), this.gl.UNSIGNED_BYTE, 0);
-        this.pointsIndiceBuffer.Bind();
-        this.gl.drawElements(this.gl.POINTS, this.pointsIndiceBuffer.Size(), this.gl.UNSIGNED_BYTE, 0);
+        //this.circleIndiceBuffer.Bind();
+        //this.gl.drawElements(this.gl.TRIANGLE_FAN, this.circleIndiceBuffer.Size(), this.gl.UNSIGNED_BYTE, 0);
+        //this.triangleIndiceBuffer.Bind();
+        //this.gl.drawElements(this.gl.TRIANGLES, this.triangleIndiceBuffer.Size(), this.gl.UNSIGNED_BYTE, 0);
+        //this.pointsIndiceBuffer.Bind();
+        //this.gl.drawElements(this.gl.POINTS, this.pointsIndiceBuffer.Size(), this.gl.UNSIGNED_BYTE, 0);
         this.cubeBuffer.Bind();
-        this.gl.drawElements(this.gl.LINE_STRIP, this.cubeBuffer.Size(), this.gl.UNSIGNED_BYTE, 0);
+        
+        var MVs = [
+                   translate(-3, 0, -10),
+                   mult(translate(0, 0, -10), rotateY(45)), 
+                   mult(translate(3, 0, -10) , mult(rotateX(-35.26), rotateY(45)))
+                  ]
+
+        for(MV of MVs)
+        {
+            this.gl.uniformMatrix4fv(this.MVLocation, false, flatten(MV));
+            this.gl.drawElements(this.gl.LINE_STRIP, this.cubeBuffer.Size(), this.gl.UNSIGNED_BYTE, 0);
+        }
 
 
         window.requestAnimationFrame(function() {this.Draw()}.bind(this));
@@ -302,6 +321,19 @@ colorPicker.addEventListener("change", function() {
             break;
         case 2:
             Renderer.drawColor = vec4(1, 0.5, 0, 1);
+            break;
+    }
+});
+
+perspectiveMenu = document.getElementById("perspective")
+perspectiveMenu.addEventListener("change", function() {
+    switch(perspectiveMenu.selectedIndex)
+    {
+        case 0:
+            Renderer.SetPerspective(true);
+            break;
+        case 1:
+            Renderer.SetPerspective(false);
             break;
     }
 });
