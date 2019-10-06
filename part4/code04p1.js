@@ -4,15 +4,17 @@ var Renderer = {
      * @type {WebGLRenderingContext}
      */
     gl : null,
-    bufferSize : 1024,
+    bufferSize : 32*1024,
     clearColor : vec4(1, 0, 0, 1),
     drawColor : vec4(0, 0, 0, 1),
+
     Setup()
     {
         this.canvas = document.getElementById("c");
         this.mode = document.getElementById("modePicker");
         this.gl = setupWebGL(this.canvas);
         this.program = initShaders(this.gl, "vertex-shader", "fragment-shader");
+        this.subdivisionLevel = subdivisonSlider.value;
     },
 
     GetDrawMode()
@@ -28,6 +30,7 @@ var Renderer = {
          * |/    |/
          * 2-----3
          */
+
         var vertices = [
             vec4( 1.0,  1.0,  1.0),
             vec4(-1.0,  1.0,  1.0),
@@ -122,15 +125,23 @@ var Renderer = {
         gl.vertexAttribPointer(vCol, 4, gl.FLOAT, false, 0, 0);
         gl.enableVertexAttribArray(vCol);
 
-        this.DrawCube();
+        this.circle = new DrawArray(this.gl, vCol, vPos, 8*1024)
         button = document.getElementById("clearButton");
         button.addEventListener("click", this.OnClear.bind(this));
         this.canvas.addEventListener("click", this.OnClick.bind(this));
         
+        this.DrawCircle();
+
         this.dotCounter = 0;
         window.requestAnimationFrame(function() {this.Draw()}.bind(this));
     },
+    DrawCircle()
+    {
+        this.circle.Clear()
 
+        this.circle = UnitSphere(this.subdivisionLevel, this.circle) 
+        this.circle.Commit()
+    },
     OnClear : function()
     {
        this.ClearCanvas(); 
@@ -237,7 +248,13 @@ var Renderer = {
         this.colors.push(color);
         return vertexIndex;
     },
-
+    PrintVertices()
+    {
+        for(v of this.vertices)
+        {
+            console.log(v)
+        }
+    },
     SetPerspective : function(orth)
     {
         var mv = this.gl.getUniformLocation(this.program, "P");
@@ -259,27 +276,20 @@ var Renderer = {
     Draw : function()
     {
         //this.gl.clearColor(this.clearColor[0], this.clearColor[1], this.clearColor[2], this.clearColor[3]);
-        this.gl.clearColor(0, 0, 0, 0);
         this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
 
-        //this.circleIndiceBuffer.Bind();
-        //this.gl.drawElements(this.gl.TRIANGLE_FAN, this.circleIndiceBuffer.Size(), this.gl.UNSIGNED_BYTE, 0);
-        //this.triangleIndiceBuffer.Bind();
-        //this.gl.drawElements(this.gl.TRIANGLES, this.triangleIndiceBuffer.Size(), this.gl.UNSIGNED_BYTE, 0);
-        //this.pointsIndiceBuffer.Bind();
-        //this.gl.drawElements(this.gl.POINTS, this.pointsIndiceBuffer.Size(), this.gl.UNSIGNED_BYTE, 0);
-        this.cubeBuffer.Bind();
         
         var MVs = [
-                   translate(-3, 0, -10),
-                   mult(translate(0, 0, -10), rotateY(45)), 
-                   mult(translate(3, 0, -10) , mult(rotateX(-35.26), rotateY(45)))
+                   //mult(translate(0, 0, -10), mult(rotateX(-20.0), rotateY(45))), 
+                    translate(0, 0, -10)
                   ]
+        
+        this.circle.Bind();
 
         for(MV of MVs)
         {
-            this.gl.uniformMatrix4fv(this.MVLocation, false, flatten(MV));
-            this.gl.drawElements(this.gl.LINE_STRIP, this.cubeBuffer.Size(), this.gl.UNSIGNED_BYTE, 0);
+           this.gl.uniformMatrix4fv(this.MVLocation, false, flatten(MV));
+           this.gl.drawArrays(this.gl.TRIANGLES, 0, this.circle.vertices.length)
         }
 
 
@@ -337,5 +347,13 @@ perspectiveMenu.addEventListener("change", function() {
             break;
     }
 });
+
+subdivisonSlider =  document.getElementById("subdivSlider")
+subdivisonSlider.addEventListener("change", function()
+    {
+        Renderer.subdivisionLevel = Number(subdivisonSlider.value);
+        Renderer.DrawCircle()
+    }
+);
 
 onload= Renderer.Run();

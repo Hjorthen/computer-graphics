@@ -39,6 +39,7 @@
             <option value="0">Orthographic</option>
             <option value="1">Perspective</option>
         </select>
+        <input id="subdivSlider" type="range" min="0" max="6" value="0"> 
         <script id="vertex-shader" type="x-shader/x-vertex">
             attribute vec4 a_Position;
             attribute vec4 a_Color;            
@@ -62,8 +63,10 @@
             }
         </script>
         <script type="text/javascript" src="initShaders.js"></script>
+        <script type="text/javascript" src="Primitives.js"></script>
+        <script type="text/javascript" src="DrawArray.js"></script>
         <script type="text/javascript" src="MV.js"></script>
         <script type="text/javascript" src="angel\webgl-utils.js"></script>
         <script type="text/javascript" src="GLBuffer.js"></script>
-        <script type="text/javascript" src="code03p2.js"></script>
+        <script type="text/javascript" src="code04p1.js"></script>
 </body></html>
