@@ -125,7 +125,8 @@ var Renderer = {
         gl.vertexAttribPointer(vCol, 4, gl.FLOAT, false, 0, 0);
         gl.enableVertexAttribArray(vCol);
 
-        this.circle = new DrawArray(this.gl, vCol, vPos, 8*1024)
+        this.circle = new DrawArray(this.gl, vCol, vPos, 128*1024)
+
         button = document.getElementById("clearButton");
         button.addEventListener("click", this.OnClear.bind(this));
         this.canvas.addEventListener("click", this.OnClick.bind(this));

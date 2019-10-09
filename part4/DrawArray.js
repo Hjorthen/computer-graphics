@@ -40,7 +40,7 @@ function DrawArray(glContext, colorAttribPointer, positionAttribPointer, size)
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colorBuffer)
         this.gl.vertexAttribPointer(this.ColorAttribPointer, 4, this.gl.FLOAT, false, 0, 0)
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffer)
-        this.gl.vertexAttribPointer(this.PositionAttribPointer, 3, this.gl.FLOAT, false, 0, 0);
+        this.gl.vertexAttribPointer(this.PositionAttribPointer, 4, this.gl.FLOAT, false, 0, 0);
     }
     
     this.Clear = function()
