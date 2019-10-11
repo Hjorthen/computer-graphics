@@ -46,14 +46,33 @@
         <script id="vertex-shader" type="x-shader/x-vertex">
             attribute vec4 a_Position;
             attribute vec4 a_Color;            
+            // TODO: Transform normal
+            attribute vec4 a_Normal;
 
             varying vec4 v_Color;
+
             uniform mat4 P;
             uniform mat4 MV;
+            uniform vec4 lightPosition;
+            uniform mat3x4 lightProperties;
+
             void main()
             {
+                const int AMBIENCE = 0;
+                const int DIFFUSE = 1;
+                const int SPECULAR = 2;
+
                 gl_Position = P * MV *  a_Position;
-                v_Color = a_Color;
+                
+                // Shading
+                vec4 l = normalize(a_Position - MV * a_Position);
+                vec4 Ia = lightProperties[AMBIANCE];
+
+                vec4 Id = dot(l, a_Normal)) * lightProperties[DIFFUSE];
+                // transform a_Normal to eyespace
+                //vec4 r = 2 * dot(l, a_Normal) * a_Normal - l;
+                //vec4 Is = (transpose(material[2]) * light[2]) * max(pow(dot(r, a_Normal), shininess), 0);
+                v_Color = Ia + Id;
                 
             }
         </script>
@@ -72,4 +91,5 @@
         <script type="text/javascript" src="angel\webgl-utils.js"></script>
         <script type="text/javascript" src="GLBuffer.js"></script>
         <script type="text/javascript" src="code04p1.js"></script>
+        <script type="text/javascript" src="light.js"></script>
 </body></html>

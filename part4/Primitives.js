@@ -45,9 +45,10 @@ function Tetrahedron(a, b, c, d, n, buffer)
     
     this.Triangle = function(a, b, c)
     {
-       this.buffer.AddVertex(a, vec4(1, 0, 0, 1))
-       this.buffer.AddVertex(b, vec4(0, 1, 0, 1))
-       this.buffer.AddVertex(c, vec4(0, 0, 1, 1))
+       var color = vec4(1, 0, 0, 1)
+       this.buffer.AddVertex(a, color, a)
+       this.buffer.AddVertex(b, color, b)
+       this.buffer.AddVertex(c, color, c)
     }
 
     this.buffer = buffer;

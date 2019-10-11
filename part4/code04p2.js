@@ -15,6 +15,13 @@ var Renderer = {
         this.gl = setupWebGL(this.canvas);
         this.program = initShaders(this.gl, "vertex-shader", "fragment-shader");
         this.subdivisionLevel = subdivisonSlider.value;
+        this.material = {
+            ambient : vec4(1.0, 0.0, 1.0, 1.0),
+            diffuse : vec4(1.0, 0.8, 0.0, 1.0),
+            specular : vec4(1.0, 0.8, 0.0, 1.0),
+            shininess : 100.0,
+            emission : vec4(0.0, 0.3, 0.3, 1.0)
+        }
     },
 
     GetDrawMode()
@@ -95,6 +102,7 @@ var Renderer = {
         var gl = this.gl;
 
         gl.enable(gl.DEPTH_TEST);
+        gl.enable(gl.CULL_FACE);
         gl.useProgram(this.program);
 
         this.vertexBuffer = gl.createBuffer();
@@ -124,8 +132,24 @@ var Renderer = {
         var vCol = gl.getAttribLocation(this.program, "a_Color");
         gl.vertexAttribPointer(vCol, 4, gl.FLOAT, false, 0, 0);
         gl.enableVertexAttribArray(vCol);
+    
+        var vNorm = gl.getAttribLocation(this.program, "a_Normal")
+        gl.vertexAttribPointer(vNorm, 4, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(vNorm);
 
-        this.circle = new DrawArray(this.gl, vCol, vPos, 128*1024)
+        this.circle = new DrawArray(this.gl, vCol, vPos, vNorm, 128*1024)
+        
+        var light = Light(vec4(0.0, 0.0, 0.0, 1),
+                          vec4(1.0, 1.0, 1.0, 0), 
+                          vec4(0.0, 0.0, 0.0, 0), 
+                          vec4(0.0, 0.0, -1.0, 0));
+        var colorMatrix = light.ColorMatrix();
+        var materialPos = gl.getUniformLocation(this.program, "lightProperties")
+        this.gl.uniformMatrix4fv(materialPos, false, flatten(colorMatrix));
+
+        var lightPos = gl.getUniformLocation(this.program, "lightPosition");
+        this.gl.uniform4fv(lightPos, flatten(light.position));
+
 
         button = document.getElementById("clearButton");
         button.addEventListener("click", this.OnClear.bind(this));
