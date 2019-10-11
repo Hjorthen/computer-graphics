@@ -12,6 +12,14 @@ var Renderer = {
     {
         this.canvas = document.getElementById("c");
         this.mode = document.getElementById("modePicker");
+        // Rotation settings
+        this.rotateCheckbox = document.getElementById("rotate");
+        this.rotation = 0;
+        this.rotationSlider = document.getElementById("rotation");
+        this.rotationSlider.onmousemove = function(e) {
+            if(e.button == 0)
+                this.rotation = this.rotationSlider.value;}.bind(this);
+
         this.gl = setupWebGL(this.canvas);
         this.program = initShaders(this.gl, "vertex-shader", "fragment-shader");
         this.subdivisionLevel = subdivisonSlider.value;
@@ -303,10 +311,15 @@ var Renderer = {
         //this.gl.clearColor(this.clearColor[0], this.clearColor[1], this.clearColor[2], this.clearColor[3]);
         this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
 
-        
+        if(this.rotateCheckbox.checked)
+        {
+            this.rotation = (this.rotation + 0.5)%360;    
+            this.rotationSlider.value = this.rotation;
+        }
+
         var MVs = [
                    //mult(translate(0, 0, -10), mult(rotateX(-20.0), rotateY(45))), 
-                    translate(0, 0, -10)
+                    mult(translate(0, 0, -10), rotate(this.rotation, vec3(0, 1, 0)))
                   ]
         
         this.circle.Bind();
