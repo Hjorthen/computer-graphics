@@ -16,9 +16,9 @@ var Renderer = {
         this.rotateCheckbox = document.getElementById("rotate");
         this.rotation = 0;
         this.rotationSlider = document.getElementById("rotation");
-        this.rotationSlider.onmousemove = function(e) {
-            if(e.button == 0)
-                this.rotation = this.rotationSlider.value;}.bind(this);
+        this.rotationSlider.oninput = function(e) {
+                this.rotation = this.rotationSlider.value;
+        }.bind(this);
 
         this.gl = setupWebGL(this.canvas);
         this.program = initShaders(this.gl, "vertex-shader", "fragment-shader");
@@ -147,8 +147,8 @@ var Renderer = {
 
         this.circle = new DrawArray(this.gl, vCol, vPos, vNorm, 128*1024)
         
-        var light = Light(vec4(0.0, 0.0, 0.0, 1),
-                          vec4(1.0, 1.0, 1.0, 0), 
+        var light = Light(vec4(0.0, 0.1, 0.0, 1),
+                          vec4(0.5, 0.0, 0.0, 0), 
                           vec4(0.0, 0.0, 0.0, 0), 
                           vec4(0.0, 0.0, -1.0, 0));
         var colorMatrix = light.ColorMatrix();

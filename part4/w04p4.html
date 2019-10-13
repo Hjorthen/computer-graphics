@@ -48,10 +48,13 @@
             <input id="rotation" type="range" min="0" max="360" value="0">
         </div>
         <div>
+            <b>Material</b><br>
             <input id="Ambiance" type="range" min="0" max="1" value="0" step="0.01">Ambiance</input><br>
             <input id="Diffuse" type="range" min="0" max="1" value="0" step="0.01">Diffuse</input><br>
             <input id="Specular" type="range" min="0" max="1" value="0" step="0.01">Specular</input><br>
             <input id="Shininess" type="range" min="0" max="5" value="0">Shininess</input><br>
+            <b>Light</b>
+            <input id="Emission" type="range" min="0" max="1" value="0" step="0.01">Emission</input><br>
         </div>
         <script id="vertex-shader" type="x-shader/x-vertex">
             attribute vec4 a_Position;
@@ -100,5 +103,6 @@
         <script type="text/javascript" src="MV.js"></script>
         <script type="text/javascript" src="angel\webgl-utils.js"></script>
         <script type="text/javascript" src="GLBuffer.js"></script>
-        <script type="text/javascript" src="code04p3.js"></script>
+        <script type="text/javascript" src="Utilities.js"></script>
+        <script type="text/javascript" src="code04p4.js"></script>
 </body></html>
