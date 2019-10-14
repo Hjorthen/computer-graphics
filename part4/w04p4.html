@@ -89,7 +89,7 @@
 
                 vec4 lPos = lightPosition * MV;
                 // direction from the light to the vertex position in vertex space
-                vec3 lDir = normalize(lPos.xyz - cPos);
+                vec3 lDir = lightPosition.w  == 0.0 ? normalize(lightPosition.xyz) : normalize(lPos.xyz - cPos);
 
                 // Max to not allow negative values
                 float d = max(dot(lDir, cNorm), 0.0);

@@ -170,7 +170,7 @@ var Renderer = {
         this.light = Light(vec4(1.0, 1.0, 1.0, 1.0),
                           vec4(1.0, 1.0, 1.0, 1.0), 
                           vec4(1.0, 1.0, 1.0, 0), 
-                          vec4(0.0, 0.0, -1.0, 0));
+                          vec4(0.0, 0.0, -1.0, 1.0));
         this.materialPos = gl.getUniformLocation(this.program, "lightProperties")
 
         var lightPos = gl.getUniformLocation(this.program, "lightPosition");
