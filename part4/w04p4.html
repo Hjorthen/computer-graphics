@@ -94,11 +94,11 @@
                 vec4 Id = lightProperties[DIFFUSE] * d;
 
                 //Halfway vector is defined as the vector halfway between the viewer and light vector
-                //vec4 halfwayV = normalize(lDir + (normalize(-cPos))); 
+                vec3 halfwayV = normalize(lDir + (normalize(-cPos))); 
                 
-                //float s = pow(max(dot(cNorm, halfwayV), 0.0), shininess);
-                //vec4 Is = lightProperties[SPECULAR] * s;
-                v_Color = vec4(Id.xyz + Ia.xyz, 1);
+                float s = pow(max(dot(cNorm, halfwayV), 0.0), shininess);
+                vec4 Is = lightProperties[SPECULAR] * s;
+                v_Color = vec4(Id.xyz + Ia.xyz + Is.xyz, 1);
             }
         </script>
         <script id="fragment-shader" type="x-shader/x-fragment">
