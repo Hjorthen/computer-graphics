@@ -58,61 +58,51 @@
         </div>
         <script id="vertex-shader" type="x-shader/x-vertex">
             attribute vec4 a_Position;
-            attribute vec4 a_Color;            
             attribute vec4 a_Normal;
-
-            varying vec4 v_Color;
 
             uniform mat4 P;
             uniform mat4 MV;
             uniform mat3 MVNorm;
 
+            varying vec3 v_Norm, v_lDir, v_cDir;
+
             uniform vec4 lightPosition;
+
+            void main()
+            {
+
+                gl_Position = P * MV *  a_Position;
+
+                // The vertex position in camera coords
+                vec3 cPos = (MV * a_Position).xyz;
+                v_Norm = normalize((MVNorm * a_Normal.xyz));
+                v_cDir = -cPos;                
+                v_lDir = lightPosition.w  == 0.0 ? normalize(lightPosition.xyz) : normalize(lightPosition.xyz - cPos);
+            }
+        </script>
+        <script id="fragment-shader" type="x-shader/x-fragment">
+            precision mediump float;
+            varying vec3 v_Norm, v_lDir, v_cDir;
             uniform mat4 lightProperties;
             uniform float shininess;
-
             void main()
             {
                 const int AMBIANCE = 0;
                 const int DIFFUSE = 1;
                 const int SPECULAR = 2;
 
-                gl_Position = P * MV *  a_Position;
-
-                // Ambience Intensity
-                vec3 Ia = lightProperties[AMBIANCE].xyz;
-
-                // The vertex position in camera coords
-                vec3 cPos = (MV * a_Position).xyz;
+                vec4 ambient = lightProperties[AMBIANCE];
+                vec3 H = normalize(v_lDir + v_cDir);
+                float Kd = max(dot(v_lDir, v_Norm), 0.0);
+                vec4 diffuse = lightProperties[DIFFUSE] * Kd;
                 
-                vec3 cNorm = normalize((MVNorm * a_Normal.xyz));
-
-                vec4 lPos = lightPosition * MV;
-                // direction from the light to the vertex position in vertex space
-                vec3 lDir = lightPosition.w  == 0.0 ? normalize(lightPosition.xyz) : normalize(lPos.xyz - cPos);
-
-                // Max to not allow negative values
-                float d = max(dot(lDir, cNorm), 0.0);
-                vec4 Id = lightProperties[DIFFUSE] * d;
-
-                //Halfway vector is defined as the vector halfway between the viewer and light vector
-                vec3 halfwayV = normalize(lDir + (-normalize(cPos))); 
-                
-                float s = pow(max(dot(cNorm, halfwayV), 0.0), shininess);
-                vec4 Is = lightProperties[SPECULAR] * s;
-                if(dot(lDir, cNorm) < 0.0)
+                float Ks = pow(max(dot(v_Norm, H),0.0), shininess);
+                vec4 specular = lightProperties[SPECULAR] * Ks;
+                if(dot(v_lDir, v_Norm) < 0.0)
                 {
-                    Is = vec4(0, 0, 0, 1);
+                    specular = vec4(0, 0, 0, 1);
                 }
-                v_Color = vec4(Id.xyz + Ia.xyz + Is.xyz, 1);
-            }
-        </script>
-        <script id="fragment-shader" type="x-shader/x-fragment">
-            precision mediump float;
-            varying vec4 v_Color;
-            void main()
-            {
-                gl_FragColor = v_Color;
+                gl_FragColor = vec4(ambient.xyz + diffuse.xyz + specular.xyz, 1);
             }
         </script>
         <script type="text/javascript" src="Light.js"></script>
@@ -123,5 +113,5 @@
         <script type="text/javascript" src="angel\webgl-utils.js"></script>
         <script type="text/javascript" src="GLBuffer.js"></script>
         <script type="text/javascript" src="Utilities.js"></script>
-        <script type="text/javascript" src="code04p4.js"></script>
+        <script type="text/javascript" src="code04p5.js"></script>
 </body></html>
