@@ -141,6 +141,7 @@ var Renderer = {
       
         this.MVLocation = gl.getUniformLocation(this.program, "MV")
         this.shininessLocation = gl.getUniformLocation(this.program, "shininess")
+        this.MVNormLocation = gl.getUniformLocation(this.program, "MVNorm")
         
         this.SetPerspective(true);
 
@@ -169,7 +170,7 @@ var Renderer = {
         this.light = Light(vec4(1.0, 1.0, 1.0, 1.0),
                           vec4(1.0, 1.0, 1.0, 1.0), 
                           vec4(1.0, 1.0, 1.0, 0), 
-                          vec4(10.0, 10.0, 0.0, 0));
+                          vec4(0.0, 0.0, -1.0, 0));
         this.materialPos = gl.getUniformLocation(this.program, "lightProperties")
 
         var lightPos = gl.getUniformLocation(this.program, "lightPosition");
@@ -338,6 +339,7 @@ var Renderer = {
         var diffuseProduct = mult(scale(this.diffuse.value, this.material.diffuse), scale(this.emission.value, this.light.diffuse));
         var specularProduct = mult(scale(this.specular.value, this.material.specular), scale(this.emission.value, this.light.specular));
         
+        // Transpose because GL is column-major
         var lightingMatrix = transpose(mat4(ambientProduct, diffuseProduct, specularProduct, vec4()))
 
         this.gl.uniformMatrix4fv(this.materialPos, false, flatten(lightingMatrix));
@@ -352,6 +354,8 @@ var Renderer = {
         for(MV of MVs)
         {
            this.gl.uniformMatrix4fv(this.MVLocation, false, flatten(MV));
+           var MVNorm = normalMatrix(MV, true);
+           this.gl.uniformMatrix3fv(this.MVNormLocation, false, flatten(MVNorm))
            this.gl.drawArrays(this.gl.TRIANGLES, 0, this.circle.vertices.length)
         }
 

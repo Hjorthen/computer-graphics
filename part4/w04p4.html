@@ -65,6 +65,8 @@
 
             uniform mat4 P;
             uniform mat4 MV;
+            uniform mat3 MVNorm;
+
             uniform vec4 lightPosition;
             uniform mat4 lightProperties;
             uniform float shininess;
@@ -83,21 +85,25 @@
                 // The vertex position in camera coords
                 vec3 cPos = (MV * a_Position).xyz;
                 
-                vec3 cNorm = normalize((a_Normal).xyz);
+                vec3 cNorm = normalize((MVNorm * a_Normal.xyz));
 
-
+                vec4 lPos = lightPosition * MV;
                 // direction from the light to the vertex position in vertex space
-                vec3 lDir = normalize(lightPosition.xyz - cPos);
+                vec3 lDir = normalize(lPos.xyz - cPos);
 
                 // Max to not allow negative values
                 float d = max(dot(lDir, cNorm), 0.0);
                 vec4 Id = lightProperties[DIFFUSE] * d;
 
                 //Halfway vector is defined as the vector halfway between the viewer and light vector
-                vec3 halfwayV = normalize(lDir + (normalize(-cPos))); 
+                vec3 halfwayV = normalize(lDir + (-normalize(cPos))); 
                 
                 float s = pow(max(dot(cNorm, halfwayV), 0.0), shininess);
                 vec4 Is = lightProperties[SPECULAR] * s;
+                if(dot(lDir, cNorm) < 0.0)
+                {
+                    Is = vec4(0, 0, 0, 1);
+                }
                 v_Color = vec4(Id.xyz + Ia.xyz + Is.xyz, 1);
             }
         </script>
