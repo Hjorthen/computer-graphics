@@ -140,6 +140,7 @@ var Renderer = {
         this.vertices = [];
       
         this.MVLocation = gl.getUniformLocation(this.program, "MV")
+        this.shininessLocation = gl.getUniformLocation(this.program, "shininess")
         
         this.SetPerspective(true);
 
@@ -340,6 +341,7 @@ var Renderer = {
         var lightingMatrix = transpose(mat4(ambientProduct, diffuseProduct, specularProduct, vec4()))
 
         this.gl.uniformMatrix4fv(this.materialPos, false, flatten(lightingMatrix));
+        this.gl.uniform1f(this.shininessLocation, this.shininess.value);
         
         var MVs = [
                     mult(translate(0, 0, -10), rotate(this.rotation, vec3(0, 1, 0)))

@@ -59,7 +59,6 @@
         <script id="vertex-shader" type="x-shader/x-vertex">
             attribute vec4 a_Position;
             attribute vec4 a_Color;            
-            // TODO: Transform normal
             attribute vec4 a_Normal;
 
             varying vec4 v_Color;
@@ -68,6 +67,7 @@
             uniform mat4 MV;
             uniform vec4 lightPosition;
             uniform mat4 lightProperties;
+            uniform float shininess;
 
             void main()
             {
@@ -76,15 +76,28 @@
                 const int SPECULAR = 2;
 
                 gl_Position = P * MV *  a_Position;
-                
-                // Shading
-                vec4 l = normalize(lightPosition - MV * a_Position);
-                vec4 Ia = lightProperties[AMBIANCE];
 
-                vec4 Id = lightProperties[DIFFUSE] * dot(l, a_Normal);
-                // transform a_Normal to eyespace
-                //vec4 r = 2 * dot(l, a_Normal) * a_Normal - l;
-                //vec4 Is = (transpose(material[2]) * light[2]) * max(pow(dot(r, a_Normal), shininess), 0);
+                // Ambience Intensity
+                vec3 Ia = lightProperties[AMBIANCE].xyz;
+
+                // The vertex position in camera coords
+                vec3 cPos = (MV * a_Position).xyz;
+                
+                vec3 cNorm = normalize((a_Normal).xyz);
+
+
+                // direction from the light to the vertex position in vertex space
+                vec3 lDir = normalize(lightPosition.xyz - cPos);
+
+                // Max to not allow negative values
+                float d = max(dot(lDir, cNorm), 0.0);
+                vec4 Id = lightProperties[DIFFUSE] * d;
+
+                //Halfway vector is defined as the vector halfway between the viewer and light vector
+                //vec4 halfwayV = normalize(lDir + (normalize(-cPos))); 
+                
+                //float s = pow(max(dot(cNorm, halfwayV), 0.0), shininess);
+                //vec4 Is = lightProperties[SPECULAR] * s;
                 v_Color = vec4(Id.xyz + Ia.xyz, 1);
             }
         </script>
