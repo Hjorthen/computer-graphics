@@ -46,6 +46,7 @@ OBJDoc.prototype.parse = function (fileString, scale, reverse) {
         var mtl = new MTLDoc();   // Create MTL instance
         this.mtls.push(mtl);
         var request = new XMLHttpRequest();
+        request.overrideMimeType("text/plain");
         request.onreadystatechange = function () {
           if (request.readyState == 4) {
             if (request.status != 404) {
