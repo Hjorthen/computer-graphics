@@ -170,12 +170,10 @@ var Renderer = {
         this.light = Light(vec4(1.0, 1.0, 1.0, 1.0),
                           vec4(1.0, 1.0, 1.0, 1.0), 
                           vec4(1.0, 1.0, 1.0, 0), 
-                          vec4(0.0, 0.0, -1.0, 1.0));
+                          vec4(0.0, 0.0, 5.0, 1.0));
         this.materialPos = gl.getUniformLocation(this.program, "lightProperties")
 
-        var lightPos = gl.getUniformLocation(this.program, "lightPosition");
-        this.gl.uniform4fv(lightPos, flatten(this.light.position));
-
+        this.lightPos = gl.getUniformLocation(this.program, "lightPosition");
 
         button = document.getElementById("clearButton");
         button.addEventListener("click", this.OnClear.bind(this));
@@ -353,6 +351,9 @@ var Renderer = {
 
         for(MV of MVs)
         {
+           var transformedLightPosition = mult(MV, this.light.position);
+           transformedLightPosition[3] = 1;
+           this.gl.uniform4fv(this.lightPos, flatten(transformedLightPosition));
            this.gl.uniformMatrix4fv(this.MVLocation, false, flatten(MV));
            var MVNorm = normalMatrix(MV, true);
            this.gl.uniformMatrix3fv(this.MVNormLocation, false, flatten(MVNorm))

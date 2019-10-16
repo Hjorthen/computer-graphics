@@ -49,10 +49,10 @@
         </div>
         <div>
             <b>Material</b><br>
-            <input id="Ambiance" type="range" min="0" max="1" value="0" step="0.01">Ambiance</input><br>
-            <input id="Diffuse" type="range" min="0" max="1" value="0" step="0.01">Diffuse</input><br>
-            <input id="Specular" type="range" min="0" max="1" value="0" step="0.01">Specular</input><br>
-            <input id="Shininess" type="range" min="0" max="5" value="0">Shininess</input><br>
+            <input id="Ambiance" type="range" min="0" max="1" value="0.1" step="0.01">Ambiance</input><br>
+            <input id="Diffuse" type="range" min="0" max="1" value="0.8" step="0.01">Diffuse</input><br>
+            <input id="Specular" type="range" min="0" max="1" value="0.1" step="0.01">Specular</input><br>
+            <input id="Shininess" type="range" min="0" max="500" step="50" value="0">Shininess</input><br>
             <b>Light</b>
             <input id="Emission" type="range" min="0" max="1" value="0" step="0.01">Emission</input><br>
         </div>
@@ -90,15 +90,18 @@
                 const int AMBIANCE = 0;
                 const int DIFFUSE = 1;
                 const int SPECULAR = 2;
+                vec3 Norm = normalize(v_Norm);
+                vec3 lDir = normalize(v_lDir);
+                vec3 cDir = normalize(v_cDir);
 
                 vec4 ambient = lightProperties[AMBIANCE];
-                vec3 H = normalize(v_lDir + v_cDir);
-                float Kd = max(dot(v_lDir, v_Norm), 0.0);
+                vec3 H = normalize(lDir + cDir);
+                float Kd = max(dot(lDir, Norm), 0.0);
                 vec4 diffuse = lightProperties[DIFFUSE] * Kd;
                 
-                float Ks = pow(max(dot(v_Norm, H),0.0), shininess);
+                float Ks = pow(max(dot(Norm, H),0.0), shininess);
                 vec4 specular = lightProperties[SPECULAR] * Ks;
-                if(dot(v_lDir, v_Norm) < 0.0)
+                if(dot(lDir, Norm) < 0.0)
                 {
                     specular = vec4(0, 0, 0, 1);
                 }
