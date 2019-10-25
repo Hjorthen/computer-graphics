@@ -23,13 +23,6 @@ var Renderer = {
         this.gl = setupWebGL(this.canvas);
         this.program = initShaders(this.gl, "vertex-shader", "fragment-shader");
         this.subdivisionLevel = subdivisonSlider.value;
-        this.material = {
-            ambient : vec4(1.0, 0.0, 1.0, 1.0),
-            diffuse : vec4(1.0, 0.8, 0.0, 1.0),
-            specular : vec4(1.0, 0.8, 0.0, 1.0),
-            shininess : 100.0,
-            emission : vec4(0.0, 0.3, 0.3, 1.0)
-        }
     },
 
     GetDrawMode()
@@ -52,26 +45,10 @@ var Renderer = {
         this.MVLocation = gl.getUniformLocation(this.program, "MV")
         
         this.SetPerspective(true);
-         
-        var vNorm = gl.getAttribLocation(this.program, "a_Normal")
-        gl.enableVertexAttribArray(vNorm);
 
-        this.circle = new DrawArray(this.gl, undefined, vPos, vNorm, 128*1024)
-        
-        var light = Light(vec4(0.0, 0.0, 0.0, 1),
-                          vec4(1.0, 1.0, 1.0, 0), 
-                          vec4(0.0, 0.0, 0.0, 0), 
-                          vec4(0.0, 0.0, -1.0, 0));
-        var colorMatrix = light.ColorMatrix();
-        var materialPos = gl.getUniformLocation(this.program, "lightProperties")
-        this.gl.uniformMatrix4fv(materialPos, false, flatten(colorMatrix));
-
-        var lightPos = gl.getUniformLocation(this.program, "lightPosition");
-        this.gl.uniform4fv(lightPos, flatten(light.position));
-        
+        this.circle = new DrawArray(this.gl, undefined, vPos, undefined, 128*1024)
         this.DrawCircle();
 
-        this.dotCounter = 0;
         window.requestAnimationFrame(function() {this.Draw()}.bind(this));
     },
     DrawCircle()

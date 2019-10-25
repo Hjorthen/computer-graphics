@@ -69,7 +69,7 @@ function DrawArray(glContext, colorAttribPointer, positionAttribPointer, normalA
             this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colorBuffer)
             this.gl.vertexAttribPointer(this.ColorAttribPointer, 4, this.gl.FLOAT, false, 0, 0)
         }
-        if(!typeof this.NormalAttribPointer !== 'undefined')
+        if(typeof this.NormalAttribPointer !== 'undefined')
         {
             this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.normalBuffer)
             this.gl.vertexAttribPointer(this.NormalAttribPointer, 4, this.gl.FLOAT, false, 0, 0)
@@ -79,9 +79,9 @@ function DrawArray(glContext, colorAttribPointer, positionAttribPointer, normalA
     this.Clear = function()
     {
         this.gl.deleteBuffer(this.buffer)
-        if(!typeof this.colorBuffer !== 'undefined')
+        if(typeof this.colorBuffer !== 'undefined')
             this.gl.deleteBuffer(this.colorBuffer)
-        if(!typeof this.normalBuffer !== 'undefined')
+        if(typeof this.normalBuffer !== 'undefined')
             this.gl.deleteBuffer(this.normalBuffer)
         this.vertices = []
         this.colors = []
