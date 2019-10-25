@@ -52,14 +52,12 @@ var Renderer = {
         this.MVLocation = gl.getUniformLocation(this.program, "MV")
         
         this.SetPerspective(true);
-        var vCol = gl.getAttribLocation(this.program, "a_Color");
-        gl.enableVertexAttribArray(vCol);
     
         var vNorm = gl.getAttribLocation(this.program, "a_Normal")
         gl.vertexAttribPointer(vNorm, 4, gl.FLOAT, false, 0, 0);
         gl.enableVertexAttribArray(vNorm);
 
-        this.circle = new DrawArray(this.gl, vCol, vPos, vNorm, 128*1024)
+        this.circle = new DrawArray(this.gl, undefined, vPos, vNorm, 128*1024)
         
         var light = Light(vec4(0.0, 0.0, 0.0, 0),
                           vec4(1.0, 1.0, 1.0, 1), 
