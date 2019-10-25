@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html><body>
+        <h4>What is the difference between Phong shading and Phong lighting?</h4>
+        Phong shading is how objects react to the different types of light(ambient, diffuse and specular) wheras lighting is how the lights emit the types. In the exercises we have mostly been using the shading model and having the light emit all types of light. 
+        <h4>What is the difference between flat shading, Gouraud shading, and Phong shading?</h4>
+        flat shading has a constant, distant light source. This has the pros of being quick to compute and can be computed with the model without requiring any extra computations each frame using vertex colors. The cons are that it has visual artifacts called Mach Bands and does not allow for dynamic lighting. <br>
+        Gouraud shading fixes some of the issues with flat shading by interpolating the normals from adjecent faces on a shared vertex used for shading. This is a bit more expensive to calculate and require that you are able to calculate the faces adjecent to a vertex, but does smooth the shading compared to flat shading. <br>
+        Phong shading is like gouraud shading but normalizes the normals across a face, making it smoother. This provides the best result but requires the shading to be done on the GPU and to be calculated for each fragment instead of each face, which can be expensive. 
+            <h4>What is the difference between a directional light and a point light?</h4>
+                Directional light only has an effect in the direction that it is pointing whereas point light affects every face around it. In the phong implementation a point light is turned into a directional light pointing towards the vertex when calculting the light. 
+            <h4>Does the eye position influence the shading of an object in any way?</h4>
+            The eye position influences the reflectiveness we see on the surface. 
+            <h4>What is the effect of setting the specular term to (0 ,0,0)?</h4>
+            The surface will not be smooth and thereby not reflect light(only scatter it, depending on the diffuseness)
+            <h4>What is the effect of increasing the shininess exponent (alpha)?</h4>
+            This makes the angle at which light will be reflected more narrow towards a perfect reflector. 
+            <h4>In what coordinate space did you compute the lighting?</h4>
+            Eye Space
+
+</body></html>
