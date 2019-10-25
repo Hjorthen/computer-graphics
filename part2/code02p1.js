@@ -23,7 +23,7 @@ var Renderer = {
         window.requestAnimationFrame(function() {this.Draw()}.bind(this));
     },
 
-    OnClick : function()
+    OnClick : function(event)
     {
         var boundingRect = event.target.getBoundingClientRect();
         var pos = subtract(vec2(event.x, event.y), vec2(boundingRect.left, boundingRect.top));
