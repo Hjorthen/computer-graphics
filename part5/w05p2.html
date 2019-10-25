@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html><body>
+        <div style="display: flex;">
+            <div style="width: 600px">
+                <canvas id="c" width="600px" height="200px"></canvas>
+            </div>
+        </div>
+        <select id="perspective" size="1">
+            <option value="0">Orthographic</option>
+            <option value="1">Perspective</option>
+        </select>
+        <div>
+            Subdivison<br>
+            <input id="subdivSlider" type="range" min="0" max="4" value="0"> 
+        </div>
+        <div>
+            <input id="rotate" type="checkbox">Rotate</input>
+            <input id="rotation" type="range" min="0" max="360" value="0">
+        </div>
+        <div>
+            <b>Material</b><br>
+            <input id="Ambiance" type="range" min="0" max="1" value="0.1" step="0.01">Ambiance</input><br>
+            <input id="Diffuse" type="range" min="0" max="1" value="0.8" step="0.01">Diffuse</input><br>
+            <input id="Specular" type="range" min="0" max="1" value="0.1" step="0.01">Specular</input><br>
+            <input id="Shininess" type="range" min="0" max="500" step="50" value="0">Shininess</input><br>
+            <b>Light</b>
+            <input id="Emission" type="range" min="0" max="1" value="1" step="0.01">Emission</input><br>
+        </div>
+        <script id="vertex-shader" type="x-shader/x-vertex">
+            attribute vec4 a_Position;
+            attribute vec4 a_Normal;
+
+            uniform mat4 P;
+            uniform mat4 MV;
+
+            varying vec3 v_Norm, v_lDir, v_cDir;
+
+            uniform vec4 lightPosition;
+
+            void main()
+            {
+
+                gl_Position = P * MV *  a_Position;
+
+                // The vertex position in camera coords
+                vec3 cPos = (MV * a_Position).xyz;
+                v_Norm = normalize((MV * a_Normal).xyz);
+                v_cDir = -cPos;                
+                v_lDir = lightPosition.w  == 0.0 ? normalize(lightPosition.xyz) : normalize(lightPosition.xyz - cPos);
+            }
+        </script>
+        <script id="fragment-shader" type="x-shader/x-fragment">
+            precision mediump float;
+            varying vec3 v_Norm, v_lDir, v_cDir;
+            uniform mat4 lightProperties;
+            uniform float shininess;
+            void main()
+            {
+                const int AMBIANCE = 0;
+                const int DIFFUSE = 1;
+                const int SPECULAR = 2;
+                vec3 Norm = normalize(v_Norm);
+                vec3 lDir = normalize(v_lDir);
+                vec3 cDir = normalize(v_cDir);
+
+                vec4 ambient = lightProperties[AMBIANCE];
+                vec3 H = normalize(lDir + cDir);
+                float Kd = max(dot(lDir, Norm), 0.0);
+                vec4 diffuse = lightProperties[DIFFUSE] * Kd;
+                
+                float Ks = pow(max(dot(Norm, H),0.0), shininess);
+                vec4 specular = lightProperties[SPECULAR] * Ks;
+                if(dot(lDir, Norm) < 0.0)
+                {
+                    specular = vec4(0, 0, 0, 1);
+                }
+                gl_FragColor = vec4(ambient.xyz + diffuse.xyz + specular.xyz, 1);
+            }
+        </script>
+        <script type="text/javascript" src="Light.js"></script>
+        <script type="text/javascript" src="initShaders.js"></script>
+        <script type="text/javascript" src="Primitives.js"></script>
+        <script type="text/javascript" src="DrawArray.js"></script>
+        <script type="text/javascript" src="DrawElements.js"></script>
+        <script type="text/javascript" src="OBJParser.js"></script>
+        <script type="text/javascript" src="MV.js"></script>
+        <script type="text/javascript" src="angel\webgl-utils.js"></script>
+        <script type="text/javascript" src="GLBuffer.js"></script>
+        <script type="text/javascript" src="Utilities.js"></script>
+        <script type="text/javascript" src="code05p2.js"></script>
+</body></html>
