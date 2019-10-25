@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html><body>
+        <div style="display: flex;">
+            <div style="width: 600px">
+                <canvas id="c" width="600px" height="200px"></canvas>
+            </div>
+            <div style="flex-grow: 1; padding-left: 8px;">
+                <b>Background</b>
+                <br>
+                <select id="colorMenu" size="1">
+                    <option value="0">Black</option>
+                    <option value="1">Blue</option>
+                    <option value="2">Green</option>
+                </select>
+
+                <br>
+                <br>
+                <b>Wrapping</b>
+                <br>
+                <select id="wrapMode" size="1">
+                    <option value="0">Repeat</option>
+                    <option value="1">Clamp</option>
+                </select>
+
+                <br>
+                <br>
+                <b>Filtering</b>
+                <br>
+                <select id="filterMode" size="1">
+                    <option value="0">Nearest</option>
+                    <option value="1">Linear</option>
+                    <option value="2">Nearest-Mipmap-Nearest</option>
+                    <option value="3">Linear-Mipmap-Nearest</option>
+                    <option value="4">Linear-Mipmap-Linear</option>
+                    <option value="5">Nearest-Mipmap-Linear</option>
+                </select>
+            </div>       
+        </div>           
+        <select id="perspective" size="1">
+            <option value="0">Orthographic</option>
+            <option value="1">Perspective</option>
+        </select>
+        <div>
+            <input id="rotate" type="checkbox">Rotate</input>
+            <input id="rotation" type="range" min="0" max="360" value="0">
+        </div>
+        <script id="vertex-shader" type="x-shader/x-vertex">
+            attribute vec4 a_Position;
+            attribute vec2 a_Texel;
+
+            uniform mat4 P;
+            uniform mat4 MV;
+            
+            varying vec2 v_Texel;
+
+            void main()
+            {
+                v_Texel = a_Texel;
+                gl_Position = P * MV *  a_Position;
+            }
+        </script>
+        <script id="fragment-shader" type="x-shader/x-fragment">
+            precision mediump float;
+            varying vec2 v_Texel;
+            uniform sampler2D myTexture;
+
+            void main()
+            {
+                gl_FragColor = texture2D(myTexture, v_Texel);
+            }
+        </script>
+        <script type="text/javascript" src="Light.js"></script>
+        <script type="text/javascript" src="initShaders.js"></script>
+        <script type="text/javascript" src="Primitives.js"></script>
+        <script type="text/javascript" src="DrawArray.js"></script>
+        <script type="text/javascript" src="DrawElements.js"></script>
+        <script type="text/javascript" src="OBJParser.js"></script>
+        <script type="text/javascript" src="MV.js"></script>
+        <script type="text/javascript" src="angel\webgl-utils.js"></script>
+        <script type="text/javascript" src="GLBuffer.js"></script>
+        <script type="text/javascript" src="Utilities.js"></script>
+        <script type="text/javascript" src="code06p2.js"></script>
+</body></html>
