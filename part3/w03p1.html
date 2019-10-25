@@ -4,37 +4,7 @@
             <div style="width: 200px">
                 <canvas id="c" width="200px" height="200px"></canvas>
             </div>
-            <div style="flex-grow: 1; padding-left: 8px;">
-                <b>Background</b>
-                <br>
-                <select id="colorMenu" size="1">
-                    <option value="0">Black</option>
-                    <option value="1">Blue</option>
-                    <option value="2">Green</option>
-                </select>
-
-                <br>
-                <br>
-                <b>Draw Color</b>
-                <br>
-                <select id="colorPicker" size="1">
-                    <option value="0">Black</option>
-                    <option value="1">Red</option>
-                    <option value="2">Orange</option>
-                </select>
-
-                <br>
-                <br>
-                <b>Draw Mode</b>
-                <br>
-                <select id="modePicker" size="1">
-                    <option value="0">Points</option>
-                    <option value="1">Triangles</option>
-                    <option value="2">Circles</option>
-                </select>
-            </div>
         </div>
-        <button id="clearButton">Clear Canvas</button>
         <script id="vertex-shader" type="x-shader/x-vertex">
             attribute vec4 a_Position;
             attribute vec4 a_Color;            
