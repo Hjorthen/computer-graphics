@@ -78,7 +78,7 @@ var Renderer = {
         this.colors = [];
     },
 
-    OnClick : function()
+    OnClick : function(event)
     {
         var boundingRect = event.target.getBoundingClientRect();
         var pos = subtract(vec2(event.x, event.y), vec2(boundingRect.left, boundingRect.top));
@@ -123,7 +123,7 @@ var Renderer = {
             {
                 var angle = offset * i;
                 this.colors.push(this.drawColor);
-                var vertexPosition = vec2(circleWidth * Math.cos(angle), circleWidth * Math.sin(angle)); 
+                var vertexPosition = vec3(circleWidth * Math.cos(angle), circleWidth * Math.sin(angle), position[2]); 
                 vertexPosition[0] += lastPosition[0];
                 vertexPosition[1] += lastPosition[1];
 
