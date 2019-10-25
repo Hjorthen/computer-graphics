@@ -77,7 +77,7 @@
                 const int DIFFUSE = 1;
                 const int SPECULAR = 2;
 
-                gl_Position = P * MV *  a_Position;
+                gl_Position = P * MV * a_Position;
 
                 // Ambience Intensity
                 vec3 Ia = lightProperties[AMBIANCE].xyz;
@@ -85,9 +85,9 @@
                 // The vertex position in camera coords
                 vec3 cPos = (MV * a_Position).xyz;
                 
-                vec3 cNorm = normalize((MVNorm * a_Normal.xyz));
+                vec3 cNorm = normalize(a_Normal.xyz);
 
-                vec4 lPos = lightPosition * MV;
+                vec4 lPos = lightPosition;
                 // direction from the light to the vertex position in vertex space
                 vec3 lDir = lightPosition.w  == 0.0 ? normalize(lightPosition.xyz) : normalize(lPos.xyz - cPos);
 
