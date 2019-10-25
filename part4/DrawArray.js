@@ -18,11 +18,14 @@ function DrawArray(glContext, colorAttribPointer, positionAttribPointer, normalA
         glContext.bufferData(glContext.ARRAY_BUFFER, this.bufferSize, glContext.STATIC_DRAW)
 
 
-        this.colorBuffer = glContext.createBuffer()
-        glContext.bindBuffer(glContext.ARRAY_BUFFER, this.colorBuffer)
-        glContext.bufferData(glContext.ARRAY_BUFFER, this.bufferSize, glContext.STATIC_DRAW)
+        if(typeof this.ColorAttribPointer !== 'undefined')
+        {
+            this.colorBuffer = glContext.createBuffer()
+            glContext.bindBuffer(glContext.ARRAY_BUFFER, this.colorBuffer)
+            glContext.bufferData(glContext.ARRAY_BUFFER, this.bufferSize, glContext.STATIC_DRAW)
+        }
 
-        if(!typeof this.NormalAttribPointer == 'undefined')
+        if(typeof this.NormalAttribPointer !== 'undefined')
         {
             this.normalBuffer = glContext.createBuffer()
             glContext.bindBuffer(glContext.ARRAY_BUFFER, this.normalBuffer, glContext.STATIC_DRAW)
@@ -39,12 +42,17 @@ function DrawArray(glContext, colorAttribPointer, positionAttribPointer, normalA
     this.Commit = function()
     {
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffer)
-        this.gl.bufferSubData(this.gl.ARRAY_BUFFER, 0, flatten(this.vertices))
+        var coords = flatten(this.vertices);
+        console.log("Uploading " + coords.length + " coordinates for " + coords.length / 4 + " vertices");
+        this.gl.bufferSubData(this.gl.ARRAY_BUFFER, 0, coords)
 
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colorBuffer)
-        this.gl.bufferSubData(this.gl.ARRAY_BUFFER, 0, flatten(this.colors))
+        if(typeof this.ColorAttribPointer !== 'undefined')
+        {
+            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colorBuffer)
+            this.gl.bufferSubData(this.gl.ARRAY_BUFFER, 0, flatten(this.colors))
+        }
 
-        if(!typeof this.NormalAttribPointer == 'undefined')
+        if(typeof this.NormalAttribPointer !== 'undefined')
         {
             this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.normalBuffer)
             this.gl.bufferSubData(this.gl.ARRAY_BUFFER, 0, flatten(this.normals))
@@ -53,13 +61,15 @@ function DrawArray(glContext, colorAttribPointer, positionAttribPointer, normalA
    
     this.Bind = function()
     {
-        // Bind color buffer and then vertices
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colorBuffer)
-        this.gl.vertexAttribPointer(this.ColorAttribPointer, 4, this.gl.FLOAT, false, 0, 0)
-
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffer)
         this.gl.vertexAttribPointer(this.PositionAttribPointer, 4, this.gl.FLOAT, false, 0, 0);
-        if(!typeof this.NormalAttribPointer == 'undefined')
+
+        if(typeof this.ColorAttribPointer !== 'undefined')
+        {
+            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colorBuffer)
+            this.gl.vertexAttribPointer(this.ColorAttribPointer, 4, this.gl.FLOAT, false, 0, 0)
+        }
+        if(!typeof this.NormalAttribPointer !== 'undefined')
         {
             this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.normalBuffer)
             this.gl.vertexAttribPointer(this.NormalAttribPointer, 4, this.gl.FLOAT, false, 0, 0)
@@ -69,8 +79,9 @@ function DrawArray(glContext, colorAttribPointer, positionAttribPointer, normalA
     this.Clear = function()
     {
         this.gl.deleteBuffer(this.buffer)
-        this.gl.deleteBuffer(this.colorBuffer)
-        if(!typeof this.normalBuffer == 'undefined')
+        if(!typeof this.colorBuffer !== 'undefined')
+            this.gl.deleteBuffer(this.colorBuffer)
+        if(!typeof this.normalBuffer !== 'undefined')
             this.gl.deleteBuffer(this.normalBuffer)
         this.vertices = []
         this.colors = []
@@ -78,6 +89,6 @@ function DrawArray(glContext, colorAttribPointer, positionAttribPointer, normalA
         this.Allocate()
     }
     this.Allocate();
-}
+flatten(this.vertices)}
 
 
