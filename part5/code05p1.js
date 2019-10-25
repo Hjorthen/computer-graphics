@@ -126,27 +126,6 @@ var Renderer = {
         this.dotCounter = 0;
         window.requestAnimationFrame(function() {this.Draw()}.bind(this));
     },
-    OnClear : function()
-    {
-       this.ClearCanvas(); 
-    },
-
-    ClearCanvas : function()
-    {
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, this.bufferSize, this.gl.STATIC_DRAW);
-    },
-
-    OnClick : function()
-    {
-        var boundingRect = event.target.getBoundingClientRect();
-        var pos = subtract(vec2(event.x, event.y), vec2(boundingRect.left, boundingRect.top));
-        var offset = vec2(boundingRect.width*0.5, boundingRect.height*0.5);
-        
-        var centeredPos = subtract(pos, offset);
-        var z = 1 - 2*((this.vertices.length + 1) / this.bufferSize);
-        var normalizedPos = vec3(centeredPos[0] / (0.5*boundingRect.width), -centeredPos[1] / (0.5*boundingRect.height), z);
-    },
 
     SetPerspective : function(orth)
     {
@@ -213,36 +192,6 @@ var Renderer = {
 function setupWebGL(canvas) {
   return WebGLUtils.setupWebGL(canvas);
 }
-
-colorMenu = document.getElementById("colorMenu");
-colorMenu.addEventListener("change", function() {
-    switch(colorMenu.selectedIndex) {
-        case 0:
-            Renderer.clearColor = (vec4(0, 0, 0, 1));
-            break;
-        case 1:
-            Renderer.clearColor = (vec4(0, 0, 1, 1));
-            break;
-        case 2:
-            Renderer.clearColor = (vec4(0, 1, 0, 1));
-            break;
-    }
-});
-
-colorPicker = document.getElementById("colorPicker");
-colorPicker.addEventListener("change", function() {
-    switch(colorPicker.selectedIndex) {
-        case 0:
-            Renderer.drawColor = vec4(0, 0, 0, 1);
-            break;
-        case 1:
-            Renderer.drawColor = vec4(1, 0, 0, 1);
-            break;
-        case 2:
-            Renderer.drawColor = vec4(1, 0.5, 0, 1);
-            break;
-    }
-});
 
 perspectiveMenu = document.getElementById("perspective")
 perspectiveMenu.addEventListener("change", function() {
