@@ -26,6 +26,10 @@
             <b>Light</b>
             <input id="Emission" type="range" min="0" max="1" value="1" step="0.01">Emission</input><br>
         </div>
+        <div>
+            <h4>Is Gouraud or Phong shading the best method for simulating highlight?</h4>
+            Phong shading is best because highlights are not restricted by the amount of vertices of the surface, this becomes expecially visibile for very small highlights. Such as with high levels of shininess and specularity. 
+        </div>
         <script id="vertex-shader" type="x-shader/x-vertex">
             attribute vec4 a_Position;
             attribute vec4 a_Normal;
