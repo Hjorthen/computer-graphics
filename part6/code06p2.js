@@ -1,7 +1,3 @@
-const ObjPath = "../Sattelite.obj";
-const MatPath = "../Sattelite.mtl";
-
-
 var Renderer = {
     
     /**
@@ -37,9 +33,7 @@ var Renderer = {
             this[s.id] = s.selectedIndex;
             s.addEventListener('change', function()
                 {
-                    console.log(this.id + " has changed");
                     thisProxy[this.id] = this.selectedIndex;
-                    console.log("Invoking " + this.id + "Changed");
                     thisProxy[this.id + "Changed"](this.selectedIndex);
                 }
             )
@@ -86,13 +80,7 @@ var Renderer = {
         this.canvas = document.getElementById("c");
         
         // Rotation settings
-        this.rotateCheckbox = document.getElementById("rotate");
-        this.rotation = 0;
-        this.rotationSlider = document.getElementById("rotation");
-        this.rotationSlider.oninput = function(e) {
-                this.rotation = this.rotationSlider.value;
-        }.bind(this);
-
+        this.rotation = 0.0;
         this.gl = setupWebGL(this.canvas);
         this.program = initShaders(this.gl, "vertex-shader", "fragment-shader");
         
@@ -211,12 +199,6 @@ var Renderer = {
     {
         this.gl.clearColor(0, 0, 1, 1);
         this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
-
-        if(this.rotateCheckbox.checked)
-        {
-            this.rotation = (this.rotation + 0.5)%360;    
-            this.rotationSlider.value = this.rotation;
-        }
 
         var MVs = [
                     //mult(translate(0, 0, 0), mult(scalem(1.0, 1.0, 1.0), rotate(this.rotation, vec3(0, 1, 0))))

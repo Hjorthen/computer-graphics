@@ -4,37 +4,7 @@
             <div style="width: 600px">
                 <canvas id="c" width="600px" height="200px"></canvas>
             </div>
-            <div style="flex-grow: 1; padding-left: 8px;">
-                <b>Background</b>
-                <br>
-                <select id="colorMenu" size="1">
-                    <option value="0">Black</option>
-                    <option value="1">Blue</option>
-                    <option value="2">Green</option>
-                </select>
-
-                <br>
-                <br>
-                <b>Draw Color</b>
-                <br>
-                <select id="colorPicker" size="1">
-                    <option value="0">Black</option>
-                    <option value="1">Red</option>
-                    <option value="2">Orange</option>
-                </select>
-
-                <br>
-                <br>
-                <b>Draw Mode</b>
-                <br>
-                <select id="modePicker" size="1">
-                    <option value="0">Points</option>
-                    <option value="1">Triangles</option>
-                    <option value="2">Circles</option>
-                </select>
-            </div>
         </div>
-        <button id="clearButton">Clear Canvas</button>
         <select id="perspective" size="1">
             <option value="0">Orthographic</option>
             <option value="1">Perspective</option>
@@ -47,24 +17,19 @@
             <input id="rotate" type="checkbox">Rotate</input>
             <input id="rotation" type="range" min="0" max="360" value="0">
         </div>
-        <div>
-            <input id="Ambiance" type="range" min="0" max="1" value="0" step="0.01">Ambiance</input><br>
-            <input id="Diffuse" type="range" min="0" max="1" value="0" step="0.01">Diffuse</input><br>
-            <input id="Specular" type="range" min="0" max="1" value="0" step="0.01">Specular</input><br>
-            <input id="Shininess" type="range" min="0" max="5" value="0">Shininess</input><br>
-        </div>
         <script id="vertex-shader" type="x-shader/x-vertex">
             attribute vec4 a_Position;
             attribute vec4 a_Color;            
-            // TODO: Transform normal
             attribute vec4 a_Normal;
 
             varying vec4 v_Color;
+            varying vec4 v_Norm;
 
             uniform mat4 P;
             uniform mat4 MV;
             uniform vec4 lightPosition;
             uniform mat4 lightProperties;
+
 
             void main()
             {
@@ -73,6 +38,7 @@
                 const int SPECULAR = 2;
 
                 gl_Position = P * MV *  a_Position;
+                v_Norm = a_Normal;
                 
                 // Shading
                 vec4 l = normalize(lightPosition - MV * a_Position);
@@ -88,9 +54,15 @@
         <script id="fragment-shader" type="x-shader/x-fragment">
             precision mediump float;
             varying vec4 v_Color;
+            varying vec4 v_Norm;
+            uniform sampler2D earth;
             void main()
             {
-                gl_FragColor = v_Color;
+                const float PI = 3.141592;
+                vec2 sCoords;
+                sCoords.x = 1.0 - (atan(v_Norm.z, v_Norm.x)/(2.0*PI));
+                sCoords.y = acos(v_Norm.y) / PI;
+                gl_FragColor = v_Color + texture2D(earth, sCoords);
             }
         </script>
         <script type="text/javascript" src="Light.js"></script>
