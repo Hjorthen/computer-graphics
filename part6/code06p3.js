@@ -23,13 +23,6 @@ var Renderer = {
         this.gl = setupWebGL(this.canvas);
         this.program = initShaders(this.gl, "vertex-shader", "fragment-shader");
         this.subdivisionLevel = subdivisonSlider.value;
-        this.material = {
-            ambient : vec4(0.0, 0.0, 0.5, 1.0),
-            diffuse : vec4(1.0, 1.0, 1.0, 1.0),
-            specular : vec4(1.0, 0.8, 0.0, 1.0),
-            shininess : 100.0,
-            emission : vec4(0.0, 0.3, 0.3, 1.0)
-        }
     },
     LoadTexture(img)
     {
@@ -54,8 +47,8 @@ var Renderer = {
         gl.useProgram(this.program);
         
         this.SetPerspective(false);
-        var light = Light(vec4(0.0, 0.1, 0.0, 1),
-                          vec4(0.5, 0.0, 0.0, 0), 
+        var light = Light(vec4(0.4, 0.4, 0.4, 1),
+                          vec4(1.0, 1.0, 1.0, 0), 
                           vec4(0.0, 0.0, 0.0, 0), 
                           vec4(0.0, 0.0, -1.0, 0));
         var colorMatrix = light.ColorMatrix();

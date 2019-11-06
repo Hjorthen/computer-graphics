@@ -62,7 +62,7 @@
                 vec2 sCoords;
                 sCoords.x = 1.0 - (atan(v_Norm.z, v_Norm.x)/(2.0*PI));
                 sCoords.y = acos(v_Norm.y) / PI;
-                gl_FragColor = v_Color + texture2D(earth, sCoords);
+                gl_FragColor = v_Color * texture2D(earth, sCoords);
             }
         </script>
         <script type="text/javascript" src="Light.js"></script>
