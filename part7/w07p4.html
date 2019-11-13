@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html><body>
+        <div style="display: flex;">
+            <div style="width: 600px">
+                <canvas id="c" width="600px" height="200px"></canvas>
+            </div>
+        </div>
+        <select id="perspective" size="1">
+            <option value="0">Orthographic</option>
+            <option value="1">Perspective</option>
+        </select>
+        <div>
+            Subdivison<br>
+            <input id="subdivSlider" type="range" min="0" max="4" value="0"> 
+        </div>
+        <div>
+            <input id="rotate" type="checkbox">Rotate</input>
+            <input id="rotation" type="range" min="0" max="360" value="0">
+        </div>
+        <script id="vertex-shader" type="x-shader/x-vertex">
+            attribute vec4 a_Position;
+            attribute vec4 a_Color;            
+            attribute vec4 a_Normal;
+
+            varying vec4 v_Norm;
+
+            uniform mat4 P;
+            uniform mat4 MV;
+            uniform mat4 Mtex;
+            
+
+
+            void main()
+            {
+                gl_Position = P * MV *  a_Position;
+                v_Norm = Mtex * a_Position;
+            }
+        </script>
+        <script id="fragment-shader" type="x-shader/x-fragment">
+            precision mediump float;
+            varying vec4 v_Norm;
+            uniform samplerCube tex;
+            uniform sampler2D normMap;
+            uniform bool reflective;
+            uniform vec3 eye;
+            vec3 rotate_to_normal(vec3 normal, vec3 v) 
+            { 
+                float a = 1.0/(1.0 + normal.z); 
+                float b = - normal.x*normal.y*a; 
+                return vec3(1.0 - normal.x*normal.x*a, b, - normal.x)*v.x + vec3( b, 1.0 - normal.y*normal.y*a, -normal.y)*v.y + normal*v.z;
+            } 
+    
+            void main()
+            {
+                if(reflective)
+                {
+                    const float PI = 3.141592;
+                    vec2 sCoords;
+                    sCoords.x = 1.0 - (atan(v_Norm.z, v_Norm.x)/(2.0*PI));
+                    sCoords.y = acos(v_Norm.y) / PI;
+                    //gl_FragColor = textureCube(tex, reflect(view.xyz, v_Norm.xyz));
+                    vec4 normalSample = texture2D(normMap, sCoords);
+                    vec4 transformedNormal = normalSample * 2.0 - 1.0;
+ 
+                    vec3 view = v_Norm.xyz - eye;
+                    gl_FragColor = textureCube(tex, reflect(view.xyz, rotate_to_normal(v_Norm.xyz, transformedNormal.xyz)));
+                }
+                else
+                {
+                    gl_FragColor = textureCube(tex, v_Norm.xyz);
+                }
+            }
+        </script>
+        <script type="text/javascript" src="Light.js"></script>
+        <script type="text/javascript" src="initShaders.js"></script>
+        <script type="text/javascript" src="Primitives.js"></script>
+        <script type="text/javascript" src="DrawArray.js"></script>
+        <script type="text/javascript" src="MV.js"></script>
+        <script type="text/javascript" src="angel\webgl-utils.js"></script>
+        <script type="text/javascript" src="GLBuffer.js"></script>
+        <script type="text/javascript" src="code07p4.js"></script>
+</body></html>
