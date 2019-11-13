@@ -68,9 +68,11 @@ DrawArray.prototype.Bind = function()
 
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffer)
     this.gl.vertexAttribPointer(this.PositionAttribPointer, 4, this.gl.FLOAT, false, 0, 0);
-    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.normalBuffer)
     if(this.NormalAttribPointer !=  -1)
+    {
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.normalBuffer)
         this.gl.vertexAttribPointer(this.NormalAttribPointer, 4, this.gl.FLOAT, false, 0, 0)
+    }
 }
     
 DrawArray.prototype.Clear = function()
