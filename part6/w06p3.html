@@ -41,7 +41,7 @@
                 v_Norm = a_Normal;
                 
                 // Shading
-                vec4 l = normalize(lightPosition - MV * a_Position);
+                vec4 l = normalize(-lightPosition);
                 vec4 Ia = lightProperties[AMBIANCE];
 
                 vec4 Id = lightProperties[DIFFUSE] * dot(l, a_Normal);
