@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html><body>
+        <div style="display: flex;">
+            <div style="width: 600px">
+                <canvas id="c" width="600px" height="200px"></canvas>
+            </div>
+        </div>
+        <select id="perspective" size="1">
+            <option value="0">Orthographic</option>
+            <option value="1">Perspective</option>
+        </select>
+        <div>
+            Subdivison<br>
+            <input id="subdivSlider" type="range" min="0" max="4" value="0"> 
+        </div>
+        <div>
+            <input id="rotate" type="checkbox">Rotate</input>
+            <input id="rotation" type="range" min="0" max="360" value="0">
+        </div>
+        I make use of a third texture for coloring shadows
+        <script id="vertex-shader" type="x-shader/x-vertex">
+            attribute vec4 a_Position;
+            attribute vec2 a_UV;            
+ 
+            uniform mat4 P;
+            uniform mat4 MV;
+            varying vec2 uv;
+
+            void main()
+            {
+                gl_Position = P * MV *  a_Position;
+                uv = a_UV;
+            }
+        </script>
+        <script id="fragment-shader" type="x-shader/x-fragment">
+            precision mediump float;
+            varying vec2 uv;
+            uniform sampler2D colorTexture;
+            void main()
+            {
+                gl_FragColor = texture2D(colorTexture, uv);
+            }
+        </script>
+        <script type="text/javascript" src="Light.js"></script>
+        <script type="text/javascript" src="initShaders.js"></script>
+        <script type="text/javascript" src="Primitives.js"></script>
+        <script type="text/javascript" src="DrawArray.js"></script>
+        <script type="text/javascript" src="MV.js"></script>
+        <script type="text/javascript" src="angel\webgl-utils.js"></script>
+        <script type="text/javascript" src="GLBuffer.js"></script>
+        <script type="text/javascript" src="code08p4.js"></script>
+</body></html>
