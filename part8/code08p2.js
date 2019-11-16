@@ -233,7 +233,6 @@ var Renderer = {
         let shadowMatrix = mult(MV, lightTranslation)
         shadowMatrix = mult(shadowMatrix, shadowProjectMatrix)
         shadowMatrix = mult(shadowMatrix, inverse(lightTranslation));
-        shadowMatrix = mult(translate(0, 0.1, 0), shadowMatrix);
          
         /*
         PrintTransform(this.parellelPlane.vertices, MV)
