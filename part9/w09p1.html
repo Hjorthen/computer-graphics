@@ -19,20 +19,47 @@
         </div>
         <script id="vertex-shader-teacup" type="x-shader/x-vertex">
             attribute vec4 a_Position;
+            attribute vec4 a_Normal;
  
             uniform mat4 P;
             uniform mat4 MV;
+            uniform vec4 lightPosition;
+            uniform mat3 normMatrix;
+
+
+            varying vec3 cameraNorm, lightDir, eyeDir;
 
             void main()
             {
                 gl_Position = P * MV *  a_Position;
+                 
+                vec3 posInCameraSpace = (MV * a_Position).xyz;
+                eyeDir = -normalize(posInCameraSpace);
+                lightDir = lightPosition.w == 0.0 ? normalize(lightPosition.xyz) : normalize(MV * lightPosition).xyz  - posInCameraSpace;
+                cameraNorm = normalize(normMatrix * a_Normal.xyz);
             }
         </script>
         <script id="fragment-shader-teacup" type="x-shader/x-fragment">
             precision mediump float;
+
+            varying vec3 cameraNorm, lightDir, eyeDir;
+
+            uniform vec3 ambience;
+            uniform vec3 diffuse;
+            uniform vec3 specular;
+            uniform float shininess;
+            uniform float shadow;
+
             void main()
             {
-                gl_FragColor = vec4(1, 0, 0, 1);
+                vec3 H = normalize(lightDir + eyeDir);
+                float diffuseFactor = max(dot(lightDir, cameraNorm), 0.0);
+                float specularFactor = pow(max(dot(cameraNorm, H), 0.0), shininess);
+                
+                if(dot(lightDir, cameraNorm) < 0.0)
+                    specularFactor = 0.0;
+                  
+                gl_FragColor = vec4(shadow * (ambience + diffuseFactor * diffuse + specularFactor * specular), 1);
             }
         </script>
         <script id="vertex-shader" type="x-shader/x-vertex">

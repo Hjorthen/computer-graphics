@@ -45,6 +45,7 @@ var Renderer = {
         this.groundProgram = initShaders(this.gl, "vertex-shader", "fragment-shader");
         this.teacupProgram = initShaders(this.gl, "vertex-shader-teacup", "fragment-shader-teacup");
         this.getShaderParameters();
+        this.setupLightParameters();
         this.LoadModel();
     },
     GetQuad()
@@ -89,6 +90,10 @@ var Renderer = {
             indices : {
                  name : 'indices',
                  size : 4
+            },
+            vNorm : {
+                name: "normals",
+                size : 3
             }
         };
 
@@ -131,6 +136,10 @@ var Renderer = {
             indices : {
                  name : 'indices',
                  size : 4
+            },
+            vNorm : {
+                name: "normals",
+                size : 3
             }
         };
 
@@ -229,6 +238,13 @@ var Renderer = {
         this.LoadModel();
         window.requestAnimationFrame(function() {this.Draw()}.bind(this));
     },
+    setupLightParameters()
+    {
+        this.ambientScale = 0.1;
+        this.diffuseScale = 0.3;
+        this.specularScale = 0.4;
+        this.shininess = 50;
+    },
     getShaderParameters()
     {
         this.groundProgram.vPos = this.gl.getAttribLocation(this.groundProgram, "a_Position");
@@ -242,8 +258,17 @@ var Renderer = {
         this.groundProgram.PLocation = this.gl.getUniformLocation(this.groundProgram, "P")
         this.teacupProgram.PLocation = this.gl.getUniformLocation(this.teacupProgram, "P")
 
+        this.groundProgram.colorWeightUniform = this.gl.getUniformLocation(this.groundProgram, "colorTexture");
         this.groundProgram.textureUniform = this.gl.getUniformLocation(this.groundProgram, "colorTexture")
 
+        this.teacupProgram.lightPosition = this.gl.getUniformLocation(this.teacupProgram, "lightPosition");
+        this.teacupProgram.normMatrixLocation = this.gl.getUniformLocation(this.teacupProgram, "normMatrix")
+        this.teacupProgram.ambienceLocation = this.gl.getUniformLocation(this.teacupProgram, "ambience");
+        this.teacupProgram.diffuseLocation = this.gl.getUniformLocation(this.teacupProgram, "diffuse");
+        this.teacupProgram.specularLocation = this.gl.getUniformLocation(this.teacupProgram, "specular");
+        this.teacupProgram.shininessLocation = this.gl.getUniformLocation(this.teacupProgram, "shininess");
+        this.teacupProgram.vNorm = this.gl.getAttribLocation(this.teacupProgram, "a_Normal");
+        this.teacupProgram.shadowLocation = this.gl.getUniformLocation(this.teacupProgram, "shadow");
     },
     async LoadModel()
     {
@@ -266,6 +291,7 @@ var Renderer = {
         this.model.vertices = this.drawInfo.vertices;
         this.model.verticesSize = 3;
         this.model.colors = this.drawInfo.colors;
+        this.model.normals = this.drawInfo.normals;
         this.model.indices = this.drawInfo.indices;
 
         console.log("Loaded " + this.model.vertices.length + " vertices from model");
@@ -314,7 +340,7 @@ var Renderer = {
                 this.heightOffset = -1;
         }
         MV = lookAt(vec3(0, 0, 1), vec3(0, 0, -3), vec3(0, 1, 0))
-
+        let lightPos = vec3(2.0 * Math.sin(radians(this.rotation)), 2, 2.0 * Math.cos(radians(this.rotation)) -2);
 
         this.gl.depthFunc(this.gl.LESS);
         // Draw the plane
@@ -327,9 +353,22 @@ var Renderer = {
 
 
         this.gl.useProgram(this.teacupProgram);
+        // Bind shading parameters
+        this.gl.uniform3fv(this.teacupProgram.ambienceLocation, vec3(this.ambientScale, this.ambientScale, this.ambientScale));
+        this.gl.uniform3fv(this.teacupProgram.diffuseLocation, vec3(this.diffuseScale, this.diffuseScale, this.diffuseScale));
+        this.gl.uniform3fv(this.teacupProgram.specularLocation, vec3(this.specularScale, this.specularScale, this.specularScale));
+        this.gl.uniform1f(this.teacupProgram.shininessLocation, this.shininess);
+        this.gl.uniform4f(this.teacupProgram.lightPosition, lightPos[0], lightPos[0], lightPos[0], 1);
+
+        let normalMatrix = [
+                             vec3(MV[0][0], MV[0][1], MV[0][2]),
+                             vec3(MV[1][0], MV[1][1], MV[1][2]),
+                             vec3(MV[2][0], MV[2][1], MV[2][2])
+                           ];
+        this.gl.uniformMatrix3fv(this.teacupProgram.normMatrixLocation, false, flatten(normalMatrix));
+        this.gl.uniform1f(this.teacupProgram.shadowLocation, 0.0);
         let modelMatrix = translate(0, this.heightOffset, -3)
         this.gl.uniform1i(this.textureUniform, 2);
-        let lightPos = vec3(2.0 * Math.sin(radians(this.rotation)), 2, 2.0 * Math.cos(radians(this.rotation)) -2); 
         let shadowProjectMatrix = mat4();
         shadowProjectMatrix[3][3] = 0.0;
         shadowProjectMatrix[3][1]= -1.0/(lightPos[1] - -1.0);
@@ -345,7 +384,8 @@ var Renderer = {
         this.gl.uniformMatrix4fv(this.teacupProgram.MVLocation, false, flatten(shadowMatrix));
         this.Bind(this.model, this.teacupProgram)
         this.gl.drawElements(this.gl.TRIANGLES, this.model.indices.length, this.gl.UNSIGNED_SHORT, 0);
-        
+
+        this.gl.uniform1f(this.teacupProgram.shadowLocation, 1.0);
         // Draw objects
         this.gl.depthFunc(this.gl.LESS);
         this.gl.uniformMatrix4fv(this.teacupProgram.PLocation, false, flatten(this.P))
