@@ -118,12 +118,6 @@ var Renderer = {
         
         this.SetPerspective(true);
         
-        button = document.getElementById("clearButton");
-        button.addEventListener("click", this.OnClear.bind(this));
-        this.canvas.addEventListener("click", this.OnClick.bind(this));
-        
-
-        this.dotCounter = 0;
         window.requestAnimationFrame(function() {this.Draw()}.bind(this));
     },
 
