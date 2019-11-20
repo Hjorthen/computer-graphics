@@ -48,10 +48,9 @@ var Renderer = {
     OnModelLoaded()
     {
         var vertexCount = this.drawInfo.vertices.length;
-        this.buffers = new DrawElements(this.gl, this.vCol, this.vPos, this.vNorm, vertexCount, this.drawInfo.indices.length); 
+        this.buffers = new DrawElements(this.gl, undefined, this.vPos, this.vNorm, vertexCount, this.drawInfo.indices.length); 
         this.buffers.vertices = this.drawInfo.vertices;
         this.buffers.normals = this.drawInfo.normals;
-        this.buffers.colors = this.drawInfo.colors;
         this.buffers.indices = this.drawInfo.indices;
         this.modelLoaded = true;
         console.log("Loaded " + vertexCount + " vertices from model");
@@ -106,10 +105,6 @@ var Renderer = {
         gl.vertexAttribPointer(this.vPos, 3, gl.FLOAT, false, 0, 0);
         gl.enableVertexAttribArray(this.vPos);
       
-        this.vCol = gl.getAttribLocation(this.program, "a_Color");
-        gl.vertexAttribPointer(this.vCol, 4, gl.FLOAT, false, 0, 0);
-        gl.enableVertexAttribArray(this.vCol);
-    
         this.vNorm = gl.getAttribLocation(this.program, "a_Normal")
         gl.vertexAttribPointer(this.vNorm, 4, gl.FLOAT, false, 0, 0);
         gl.enableVertexAttribArray(this.vNorm);

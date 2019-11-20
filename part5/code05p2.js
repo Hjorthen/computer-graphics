@@ -131,7 +131,6 @@ var Renderer = {
 
         this.SetPerspective(true);
         
-        this.dotCounter = 0;
         window.requestAnimationFrame(function() {this.Draw()}.bind(this));
     },
 
