@@ -245,7 +245,7 @@ var Renderer = {
     setupLightParameters()
     {
         this.ambientScale = 0.1;
-        this.diffuseScale = 0.3;
+        this.diffuseScale = 0.5;
         this.specularScale = 0.4;
         this.shininess = 50;
     },
@@ -352,7 +352,7 @@ var Renderer = {
                 this.heightOffset = -1;
         }
         this.model.modelMatrix = translate(0, this.heightOffset, -3)
-        let lightPos = vec3(2.0 * Math.sin(radians(this.rotation)), 2, 2.0 * Math.cos(radians(this.rotation)) -2);
+        let lightPos = vec3(4.0 * Math.sin(radians(this.rotation)), 1, 4.0 * Math.cos(radians(this.rotation)) -3);
         let lightMV = lookAt(lightPos, vec3(0, -1, -3), vec3(0, 1, 0))
         this.DrawShadowmap(lightMV);
         let MV = lookAt(vec3(0, 0, 1), vec3(0, 0, -3), vec3(0, 1, 0))
@@ -399,10 +399,10 @@ var Renderer = {
         this.gl.uniformMatrix4fv(this.teacupProgram.lightMVPLocation, false, flatten(lightMVP))
         this.gl.uniform1i(this.teacupProgram.shadowMapLocation, 1);
         this.gl.uniform1f(this.teacupProgram.shininessLocation, this.shininess);
-        this.gl.uniform4f(this.teacupProgram.lightPosition, lightPos[0], lightPos[0], lightPos[0], 1);
+        this.gl.uniform4f(this.teacupProgram.lightPosition, lightPos[0], lightPos[1], lightPos[2], 1);
 
         // Draw objects
-        let normM = normalMatrix(MV, true)
+        let normM = normalMatrix(mult(MV, this.model.modelMatrix), true)
         this.gl.uniformMatrix3fv(this.teacupProgram.normMatrixLocation, false, flatten(normM));
         this.gl.uniformMatrix4fv(this.teacupProgram.PLocation, false, flatten(this.P))
         this.gl.uniformMatrix4fv(this.teacupProgram.VLocation, false, flatten(MV));

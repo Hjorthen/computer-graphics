@@ -63,7 +63,7 @@
                 
                 if(dot(normalize(lightDir), normalize(cameraNorm)) < 0.0)
                     specularFactor = 0.0;
-                gl_FragColor = vec4(vec3(0, 1, 0) * diffuseFactor, 1);
+                gl_FragColor = vec4(diffuse* diffuseFactor + specular* specularFactor + ambience, 1);
             }
         </script>
         <script id="vertex-shader" type="x-shader/x-vertex">
