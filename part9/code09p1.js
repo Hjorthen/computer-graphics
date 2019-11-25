@@ -334,7 +334,7 @@ var Renderer = {
         this.gl.uniform3fv(this.teacupProgram.diffuseLocation, vec3(this.diffuseScale, this.diffuseScale, this.diffuseScale));
         this.gl.uniform3fv(this.teacupProgram.specularLocation, vec3(this.specularScale, this.specularScale, this.specularScale));
         this.gl.uniform1f(this.teacupProgram.shininessLocation, this.shininess);
-        this.gl.uniform4f(this.teacupProgram.lightPosition, lightPos[0], lightPos[0], lightPos[0], 1);
+        this.gl.uniform4f(this.teacupProgram.lightPosition, lightPos[0], lightPos[1], lightPos[2], 1);
 
         let normM = normalMatrix(MV, true);
         this.gl.uniformMatrix3fv(this.teacupProgram.normMatrixLocation, false, flatten(normM));
