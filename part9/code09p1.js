@@ -336,12 +336,8 @@ var Renderer = {
         this.gl.uniform1f(this.teacupProgram.shininessLocation, this.shininess);
         this.gl.uniform4f(this.teacupProgram.lightPosition, lightPos[0], lightPos[0], lightPos[0], 1);
 
-        let normalMatrix = [
-                             vec3(MV[0][0], MV[0][1], MV[0][2]),
-                             vec3(MV[1][0], MV[1][1], MV[1][2]),
-                             vec3(MV[2][0], MV[2][1], MV[2][2])
-                           ];
-        this.gl.uniformMatrix3fv(this.teacupProgram.normMatrixLocation, false, flatten(normalMatrix));
+        let normM = normalMatrix(MV, true);
+        this.gl.uniformMatrix3fv(this.teacupProgram.normMatrixLocation, false, flatten(normM));
         this.gl.uniform1f(this.teacupProgram.shadowLocation, 0.0);
         let modelMatrix = translate(0, this.heightOffset, -3)
         this.gl.uniform1i(this.textureUniform, 2);
@@ -365,7 +361,7 @@ var Renderer = {
         // Draw objects
         this.gl.depthFunc(this.gl.LESS);
         this.gl.uniformMatrix4fv(this.teacupProgram.PLocation, false, flatten(this.P))
-        this.gl.uniformMatrix4fv(this.teacupProgram.MVLocation, false, flatten(mult(modelMatrix, MV)));
+        this.gl.uniformMatrix4fv(this.teacupProgram.MVLocation, false, flatten(mult(MV, modelMatrix)));
         this.Bind(this.model, this.teacupProgram);
         this.gl.drawElements(this.gl.TRIANGLES, this.model.indices.length, this.gl.UNSIGNED_SHORT, 0);
          
