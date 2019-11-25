@@ -57,13 +57,20 @@
             uniform sampler2D shadowMap;
             void main()
             {
+                // Calculate Phong shading 
                 vec3 H = normalize(lightDir + eyeDir);
                 float diffuseFactor = max(dot(normalize(lightDir), normalize(cameraNorm)), 0.0);
                 float specularFactor = pow(max(dot(normalize(cameraNorm), H), 0.0), shininess);
                 
                 if(dot(normalize(lightDir), normalize(cameraNorm)) < 0.0)
                     specularFactor = 0.0;
-                gl_FragColor = vec4(diffuse* diffuseFactor + specular* specularFactor + ambience, 1);
+                
+                vec3 fragPos = 0.5*(lightPerspectivePosition.xyz / lightPerspectivePosition.w) + 0.5;
+                float shadowDepth = texture2D(shadowMap, fragPos.xy).r;
+                if(shadowDepth + 0.005 < fragPos.z)
+                    gl_FragColor = vec4(0, 0, 0, 1);
+                else
+                    gl_FragColor = vec4(diffuse* diffuseFactor + specular* specularFactor + ambience, 1);
             }
         </script>
         <script id="vertex-shader" type="x-shader/x-vertex">
@@ -74,9 +81,11 @@
             uniform mat4 MV;
             uniform mat4 lightMVP;
             varying vec2 uv;
+            varying vec4 lightPerspectivePosition;
 
             void main()
             {
+                lightPerspectivePosition = lightMVP * a_Position;
                 gl_Position = P * MV *  a_Position;
                 uv = a_UV;
             }
@@ -85,10 +94,16 @@
             precision mediump float;
             varying vec2 uv;
             uniform sampler2D colorTexture;
+            varying vec4 lightPerspectivePosition;
             uniform sampler2D shadowMap;
             void main()
             {
-                gl_FragColor = texture2D(colorTexture, uv);
+                vec3 fragPos = 0.5*(lightPerspectivePosition.xyz / lightPerspectivePosition.w) + 0.5;
+                float shadowDepth = texture2D(shadowMap, fragPos.xy).r;
+                if(shadowDepth + 0.005 < fragPos.z)
+                    gl_FragColor = vec4(0, 0, 0, 1);
+                else
+                    gl_FragColor = texture2D(colorTexture, uv);
             }
         </script>
         <script id="fragment-shader-shadowmap" type="x-shader/x-fragment">
