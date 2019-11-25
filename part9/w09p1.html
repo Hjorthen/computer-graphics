@@ -22,20 +22,21 @@
             attribute vec4 a_Normal;
  
             uniform mat4 P;
-            uniform mat4 MV;
+            uniform mat4 M;
+            uniform mat4 V;
             uniform vec4 lightPosition;
             uniform mat3 normMatrix;
-
 
             varying vec3 cameraNorm, lightDir, eyeDir;
 
             void main()
             {
+                mat4 MV = V * M;
                 gl_Position = P * MV *  a_Position;
                  
                 vec3 posInCameraSpace = (MV * a_Position).xyz;
-                eyeDir = -normalize(posInCameraSpace);
-                lightDir = lightPosition.w == 0.0 ? normalize(lightPosition.xyz) : normalize(MV * lightPosition).xyz  - posInCameraSpace;
+                eyeDir = normalize(-posInCameraSpace);
+                lightDir = normalize(lightPosition.w == 0.0 ? normalize(lightPosition.xyz) : (V * lightPosition).xyz  - posInCameraSpace);
                 cameraNorm = normalize(normMatrix * a_Normal.xyz);
             }
         </script>

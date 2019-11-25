@@ -229,7 +229,8 @@ var Renderer = {
         this.groundProgram.vUV = this.gl.getAttribLocation(this.groundProgram, "a_UV");
 
         this.groundProgram.MVLocation = this.gl.getUniformLocation(this.groundProgram, "MV")
-        this.teacupProgram.MVLocation = this.gl.getUniformLocation(this.teacupProgram, "MV")
+        this.teacupProgram.VLocation = this.gl.getUniformLocation(this.teacupProgram, "V")
+        this.teacupProgram.MLocation = this.gl.getUniformLocation(this.teacupProgram, "M")
 
         this.groundProgram.PLocation = this.gl.getUniformLocation(this.groundProgram, "P")
         this.teacupProgram.PLocation = this.gl.getUniformLocation(this.teacupProgram, "P")
@@ -353,7 +354,8 @@ var Renderer = {
         // Draw Shadows
         this.gl.depthFunc(this.gl.GREATER);
         this.gl.uniformMatrix4fv(this.teacupProgram.PLocation, false, flatten(mult(translate(0, 0, 0.5), this.P)))
-        this.gl.uniformMatrix4fv(this.teacupProgram.MVLocation, false, flatten(shadowMatrix));
+        this.gl.uniformMatrix4fv(this.teacupProgram.VLocation, false, flatten(mat4()));
+        this.gl.uniformMatrix4fv(this.teacupProgram.MLocation, false, flatten(shadowMatrix));
         this.Bind(this.model, this.teacupProgram)
         this.gl.drawElements(this.gl.TRIANGLES, this.model.indices.length, this.gl.UNSIGNED_SHORT, 0);
 
@@ -361,7 +363,8 @@ var Renderer = {
         // Draw objects
         this.gl.depthFunc(this.gl.LESS);
         this.gl.uniformMatrix4fv(this.teacupProgram.PLocation, false, flatten(this.P))
-        this.gl.uniformMatrix4fv(this.teacupProgram.MVLocation, false, flatten(mult(MV, modelMatrix)));
+        this.gl.uniformMatrix4fv(this.teacupProgram.VLocation, false, flatten(MV));
+        this.gl.uniformMatrix4fv(this.teacupProgram.MLocation, false, flatten(modelMatrix));
         this.Bind(this.model, this.teacupProgram);
         this.gl.drawElements(this.gl.TRIANGLES, this.model.indices.length, this.gl.UNSIGNED_SHORT, 0);
          
