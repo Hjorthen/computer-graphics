@@ -202,7 +202,7 @@ var Renderer = {
         this.SetPerspective(false);
 
         this.groundPlane = this.GetQuad();
-        var groundTransform = mult(translate(0, -1, -5), mult(scalem(2, 1, 4), rotateX(-90)))
+        var groundTransform = mult(translate(0, -1, -3), mult(scalem(2, 1, 2), rotateX(-90)))
         // Transform the quad vertices to the right orientation
         for(i=0;i<this.groundPlane.vertices.length;++i)
         {
@@ -353,11 +353,13 @@ var Renderer = {
 
         // Draw Shadows
         this.gl.depthFunc(this.gl.GREATER);
+        this.gl.disable(this.gl.CULL_FACE)
         this.gl.uniformMatrix4fv(this.teacupProgram.PLocation, false, flatten(mult(translate(0, 0, 0.5), this.P)))
         this.gl.uniformMatrix4fv(this.teacupProgram.VLocation, false, flatten(mat4()));
         this.gl.uniformMatrix4fv(this.teacupProgram.MLocation, false, flatten(shadowMatrix));
         this.Bind(this.model, this.teacupProgram)
         this.gl.drawElements(this.gl.TRIANGLES, this.model.indices.length, this.gl.UNSIGNED_SHORT, 0);
+        this.gl.enable(this.gl.CULL_FACE)
 
         this.gl.uniform1f(this.teacupProgram.shadowLocation, 1.0);
         // Draw objects
