@@ -229,7 +229,7 @@ var Renderer = {
         this.SetPerspective(false);
 
         this.groundPlane = this.GetQuad();
-        var groundTransform = mult(translate(0, -1, -5), mult(scalem(2, 1, 4), rotateX(-90)))
+        var groundTransform = mult(translate(0, -1, -3), mult(scalem(2, 1, 2), rotateX(-90)))
         // Transform the quad vertices to the right orientation
         for(i=0;i<this.groundPlane.vertices.length;++i)
         {
@@ -273,9 +273,7 @@ var Renderer = {
         this.teacupProgram.specularLocation = this.gl.getUniformLocation(this.teacupProgram, "specular");
         this.teacupProgram.shininessLocation = this.gl.getUniformLocation(this.teacupProgram, "shininess");
         this.teacupProgram.vNorm = this.gl.getAttribLocation(this.teacupProgram, "a_Normal");
-
-        this.shadowProgram.PLocation = this.gl.getUniformLocation(this.shadowProgram, "P")
-        this.shadowProgram.MVLocation = this.gl.getUniformLocation(this.shadowProgram, "MV")
+        this.shadowProgram.MVPLocation = this.gl.getUniformLocation(this.shadowProgram, "MVP")
         this.shadowProgram.vPos = this.gl.getAttribLocation(this.shadowProgram, "a_Position");
 
         this.groundProgram.shadowMapLocation = this.gl.getUniformLocation(this.groundProgram, "shadowMap");
@@ -348,44 +346,49 @@ var Renderer = {
         if(this.moveCheckbox.checked)
         {
             this.heightOffset = this.heightOffset + 0.01;
-            if(this.heightOffset > 1)
+            if(this.heightOffset > 0.5)
                 this.heightOffset = -1;
         }
         this.model.modelMatrix = translate(0, this.heightOffset, -3)
-        let lightPos = vec3(4.0 * Math.sin(radians(this.rotation)), 1, 4.0 * Math.cos(radians(this.rotation)) -3);
-        let lightMV = lookAt(lightPos, vec3(0, -1, -3), vec3(0, 1, 0))
+        let lightPos = vec3(2.0 * Math.sin(radians(this.rotation)), 2, 2.0 * Math.cos(radians(this.rotation)) -3);
+        let lightMV = lookAt(lightPos, vec3(0, -2, -3), vec3(0, 1, 0))
+        console.log(lightPos + " " + this.rotation);
         this.DrawShadowmap(lightMV);
-        let MV = lookAt(vec3(0, 0, 1), vec3(0, 0, -3), vec3(0, 1, 0))
+        let MV = lookAt(vec3(0, 1, 1), vec3(0, 0, -3), vec3(0, 1, 0))
         this.DrawScene(MV, lightPos, lightMV);
         window.requestAnimationFrame(function() {this.Draw()}.bind(this));
     },
     DrawShadowmap : function(MV)
     {
+        // Disable culling to not have gaps in the shadows
+        this.gl.disable(this.gl.CULL_FACE);
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.shadowFramebuffer)
         this.gl.clearColor(0, 0, 0, 1)
         this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
         this.gl.viewport(0, 0, this.shadowFramebuffer.width, this.shadowFramebuffer.height)
+        this.lightMVP = {}
+        let lightP = perspective(90.0, 1.0, 0.5, 5.0);
+        this.lightMVP.ground = mult(lightP, MV);
         this.gl.useProgram(this.shadowProgram);
-        this.gl.uniformMatrix4fv(this.shadowProgram.MVLocation, false, flatten(MV));
-        this.gl.uniformMatrix4fv(this.shadowProgram.PLocation, false, flatten(this.P))
+        this.gl.uniformMatrix4fv(this.shadowProgram.MVPLocation, false, flatten(this.lightMVP.ground));
         this.Bind(this.groundPlane, this.shadowProgram);
         this.gl.drawArrays(this.gl.TRIANGLES, 0, this.groundPlane.vertices.length)
 
-        this.gl.uniformMatrix4fv(this.shadowProgram.MVLocation, false, flatten(mult(MV, this.model.modelMatrix)));
+        this.lightMVP.teacup = mult(lightP, mult(MV, this.model.modelMatrix))
+        this.gl.uniformMatrix4fv(this.shadowProgram.MVPLocation, false, flatten(this.lightMVP.teacup));
         this.Bind(this.model, this.shadowProgram);
         this.gl.drawElements(this.gl.TRIANGLES, this.model.indices.length, this.gl.UNSIGNED_SHORT, 0);
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null)
         this.gl.viewport(0, 0, this.canvas.width, this.canvas.height)
-
+        this.gl.enable(this.gl.CULL_FACE);
     },
     DrawScene : function(MV, lightPos, lightMV)
     {
-        let lightMVP = mult(this.P, lightMV)
         // Draw the plane
         this.gl.useProgram(this.groundProgram);
         this.gl.uniformMatrix4fv(this.groundProgram.MVLocation, false, flatten(MV));
         this.gl.uniformMatrix4fv(this.groundProgram.PLocation, false, flatten(this.P))
-        this.gl.uniformMatrix4fv(this.groundProgram.lightMVPLocation, false, flatten(lightMVP));
+        this.gl.uniformMatrix4fv(this.groundProgram.lightMVPLocation, false, flatten(this.lightMVP.ground));
         this.gl.uniform1i(this.groundProgram.textureUniform, 0);
         this.gl.uniform1i(this.groundProgram.shadowMapLocation, 1);
         this.Bind(this.groundPlane, this.groundProgram);
@@ -396,7 +399,7 @@ var Renderer = {
         this.gl.uniform3fv(this.teacupProgram.ambienceLocation, vec3(this.ambientScale, this.ambientScale, this.ambientScale));
         this.gl.uniform3fv(this.teacupProgram.diffuseLocation, vec3(this.diffuseScale, this.diffuseScale, this.diffuseScale));
         this.gl.uniform3fv(this.teacupProgram.specularLocation, vec3(this.specularScale, this.specularScale, this.specularScale));
-        this.gl.uniformMatrix4fv(this.teacupProgram.lightMVPLocation, false, flatten(lightMVP))
+        this.gl.uniformMatrix4fv(this.teacupProgram.lightMVPLocation, false, flatten(this.lightMVP.teacup))
         this.gl.uniform1i(this.teacupProgram.shadowMapLocation, 1);
         this.gl.uniform1f(this.teacupProgram.shininessLocation, this.shininess);
         this.gl.uniform4f(this.teacupProgram.lightPosition, lightPos[0], lightPos[1], lightPos[2], 1);
