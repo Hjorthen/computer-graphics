@@ -367,7 +367,8 @@ var Renderer = {
         this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
         this.gl.viewport(0, 0, this.shadowFramebuffer.width, this.shadowFramebuffer.height)
         this.lightMVP = {}
-        let lightP = perspective(90.0, 1.0, 0.5, 5.0);
+        // Far plane at Z=2 since nothing interesting is close to the camera anyways.
+        let lightP = perspective(90.0, 1.0, 2.0, 5.0);
         this.lightMVP.ground = mult(lightP, MV);
         this.gl.useProgram(this.shadowProgram);
         this.gl.uniformMatrix4fv(this.shadowProgram.MVPLocation, false, flatten(this.lightMVP.ground));
