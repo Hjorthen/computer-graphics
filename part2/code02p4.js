@@ -182,7 +182,7 @@ colorMenu = document.getElementById("colorMenu");
 colorMenu.addEventListener("change", function() {
     switch(colorMenu.selectedIndex) {
         case 0:
-            Renderer.clearColor = (vec4(0, 0, 0, 1));
+            Renderer.clearColor = (vec4(1, 1, 0, 1));
             break;
         case 1:
             Renderer.clearColor = (vec4(0, 0, 1, 1));
