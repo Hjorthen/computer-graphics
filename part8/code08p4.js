@@ -31,7 +31,6 @@ var Renderer = {
 
         this.gl = setupWebGL(this.canvas);
         this.program = initShaders(this.gl, "vertex-shader", "fragment-shader");
-        this.subdivisionLevel = subdivisonSlider.value;
     },
     GetQuad()
     {
@@ -158,7 +157,7 @@ var Renderer = {
         gl.enable(gl.BLEND);
         gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
         gl.enable(gl.DEPTH_TEST);
-        gl.enable(gl.CULL_FACE);
+        //gl.enable(gl.CULL_FACE);
         gl.useProgram(this.program);
         
         this.SetPerspective(false);
@@ -278,26 +277,5 @@ var Renderer = {
 function setupWebGL(canvas) {
   return WebGLUtils.setupWebGL(canvas, { alpha: false });
 }
-
-perspectiveMenu = document.getElementById("perspective")
-perspectiveMenu.addEventListener("change", function() {
-    switch(perspectiveMenu.selectedIndex)
-    {
-        case 0:
-            Renderer.SetPerspective(true);
-            break;
-        case 1:
-            Renderer.SetPerspective(false);
-            break;
-    }
-});
-
-subdivisonSlider =  document.getElementById("subdivSlider")
-subdivisonSlider.addEventListener("change", function()
-    {
-        Renderer.subdivisionLevel = Number(subdivisonSlider.value);
-        Renderer.DrawCircle()
-    }
-);
 
 onload= Renderer.Run();

@@ -12,35 +12,9 @@ var Renderer = {
     clearColor : vec4(1, 0, 0, 1),
     drawColor : vec4(0, 0, 0, 1),
 
-    SetupSliders()
-    {
-        var sliders = {
-            ambient : "Ambiance",
-            diffuse : "Diffuse",
-            specular : "Specular",
-            shininess : "Shininess",
-            emission : "Emission"
-        }
-
-        for(v in sliders)
-        {
-            slider = document.getElementById(sliders[v]) 
-            this[v] = new SliderValue(slider)
-        }
-    },
-
     Setup()
     {
         this.canvas = document.getElementById("c");
-        
-        // Rotation settings
-        this.rotateCheckbox = document.getElementById("rotate");
-        this.rotation = 0;
-        this.rotationSlider = document.getElementById("rotation");
-        this.rotationSlider.oninput = function(e) {
-                this.rotation = this.rotationSlider.value;
-        }.bind(this);
-
         this.gl = setupWebGL(this.canvas);
         this.program = initShaders(this.gl, "vertex-shader", "fragment-shader");
         
@@ -159,12 +133,6 @@ var Renderer = {
         this.gl.clearColor(0, 0, 1, 1);
         this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
 
-        if(this.rotateCheckbox.checked)
-        {
-            this.rotation = (this.rotation + 0.5)%360;    
-            this.rotationSlider.value = this.rotation;
-        }
-
         var MVs = [
                     //mult(translate(0, 0, 0), mult(scalem(1.0, 1.0, 1.0), rotate(this.rotation, vec3(0, 1, 0))))
                   lookAt(vec3(0.0, 0.0, 0.5), vec3(0.0, 0.0, 0.0), vec3(0.0, 1.0, 0.0))  
@@ -191,17 +159,5 @@ function setupWebGL(canvas) {
 }
 
 
-perspectiveMenu = document.getElementById("perspective")
-perspectiveMenu.addEventListener("change", function() {
-    switch(perspectiveMenu.selectedIndex)
-    {
-        case 0:
-            Renderer.SetPerspective(true);
-            break;
-        case 1:
-            Renderer.SetPerspective(false);
-            break;
-    }
-});
 
 onload= Renderer.Run();

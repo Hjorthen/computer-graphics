@@ -8,23 +8,6 @@ var Renderer = {
     clearColor : vec4(1, 0, 0, 1),
     drawColor : vec4(0, 0, 0, 1),
 
-    SetupSliders()
-    {
-        var sliders = {
-            ambient : "Ambiance",
-            diffuse : "Diffuse",
-            specular : "Specular",
-            shininess : "Shininess",
-            emission : "Emission"
-        }
-
-        for(v in sliders)
-        {
-            slider = document.getElementById(sliders[v]) 
-            this[v] = new SliderValue(slider)
-        }
-    },
-
     SetupSelect()
     {
         for(s of document.getElementsByTagName("select"))
@@ -224,19 +207,5 @@ var Renderer = {
 function setupWebGL(canvas) {
   return WebGLUtils.setupWebGL(canvas);
 }
-
-
-perspectiveMenu = document.getElementById("perspective")
-perspectiveMenu.addEventListener("change", function() {
-    switch(perspectiveMenu.selectedIndex)
-    {
-        case 0:
-            Renderer.SetPerspective(true);
-            break;
-        case 1:
-            Renderer.SetPerspective(false);
-            break;
-    }
-});
 
 onload= Renderer.Run();

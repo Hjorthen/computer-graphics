@@ -20,7 +20,6 @@ var Renderer = {
     Setup()
     {
         this.canvas = document.getElementById("c");
-        this.mode = document.getElementById("modePicker");
         // Rotation settings
         this.rotateCheckbox = document.getElementById("rotate");
         this.rotation = 0;
@@ -31,7 +30,6 @@ var Renderer = {
 
         this.gl = setupWebGL(this.canvas);
         this.program = initShaders(this.gl, "vertex-shader", "fragment-shader");
-        this.subdivisionLevel = subdivisonSlider.value;
     },
     GetQuad()
     {
@@ -258,25 +256,5 @@ function setupWebGL(canvas) {
   return WebGLUtils.setupWebGL(canvas);
 }
 
-perspectiveMenu = document.getElementById("perspective")
-perspectiveMenu.addEventListener("change", function() {
-    switch(perspectiveMenu.selectedIndex)
-    {
-        case 0:
-            Renderer.SetPerspective(true);
-            break;
-        case 1:
-            Renderer.SetPerspective(false);
-            break;
-    }
-});
-
-subdivisonSlider =  document.getElementById("subdivSlider")
-subdivisonSlider.addEventListener("change", function()
-    {
-        Renderer.subdivisionLevel = Number(subdivisonSlider.value);
-        Renderer.DrawCircle()
-    }
-);
 
 onload= Renderer.Run();

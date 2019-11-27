@@ -4,48 +4,6 @@
             <div style="width: 600px">
                 <canvas id="c" width="600px" height="200px"></canvas>
             </div>
-            <div style="flex-grow: 1; padding-left: 8px;">
-                <b>Background</b>
-                <br>
-                <select id="colorMenu" size="1">
-                    <option value="0">Black</option>
-                    <option value="1">Blue</option>
-                    <option value="2">Green</option>
-                </select>
-
-                <br>
-                <br>
-                <b>Draw Color</b>
-                <br>
-                <select id="colorPicker" size="1">
-                    <option value="0">Black</option>
-                    <option value="1">Red</option>
-                    <option value="2">Orange</option>
-                </select>
-
-                <br>
-                <br>
-                <b>Draw Mode</b>
-                <br>
-                <select id="modePicker" size="1">
-                    <option value="0">Points</option>
-                    <option value="1">Triangles</option>
-                    <option value="2">Circles</option>
-                </select>
-            </div>
-        </div>
-        <button id="clearButton">Clear Canvas</button>
-        <select id="perspective" size="1">
-            <option value="0">Orthographic</option>
-            <option value="1">Perspective</option>
-        </select>
-        <div>
-            Subdivison<br>
-            <input id="subdivSlider" type="range" min="0" max="4" value="0"> 
-        </div>
-        <div>
-            <input id="rotate" type="checkbox">Rotate</input>
-            <input id="rotation" type="range" min="0" max="360" value="0">
         </div>
         <script id="vertex-shader" type="x-shader/x-vertex">
             attribute vec4 a_Position;

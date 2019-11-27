@@ -208,19 +208,6 @@ function setupWebGL(canvas) {
   return WebGLUtils.setupWebGL(canvas);
 }
 
-perspectiveMenu = document.getElementById("perspective")
-perspectiveMenu.addEventListener("change", function() {
-    switch(perspectiveMenu.selectedIndex)
-    {
-        case 0:
-            Renderer.SetPerspective(true);
-            break;
-        case 1:
-            Renderer.SetPerspective(false);
-            break;
-    }
-});
-
 subdivisonSlider =  document.getElementById("subdivSlider")
 subdivisonSlider.addEventListener("change", function()
     {
