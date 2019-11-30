@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html><body>
+        <div style="display: flex;">
+            <div style="width: 600px">
+                <canvas id="c" width="600px" height="200px"></canvas>
+            </div>
+        </div>
+        <script id="vertex-shader-terrain" type="x-shader/x-vertex">
+            attribute vec4 a_Position;
+ 
+            uniform mat4 P;
+            uniform mat4 MV;
+            varying vec4 pos;
+            void main()
+            {
+                gl_Position = P * MV *  a_Position;
+                pos = a_Position;
+            }
+        </script>
+        <script id="fragment-shader-terrain" type="x-shader/x-fragment">
+            precision mediump float;
+            varying vec4 pos;
+            void main()
+            {
+                gl_FragColor = pos;
+            }
+        </script>
+        <script type="text/javascript" src="Light.js"></script>
+        <script type="text/javascript" src="../lib/angel/initShaders.js"></script>
+        <script type="text/javascript" src="Primitives.js"></script>
+        <script type="text/javascript" src="DrawArray.js"></script>
+        <script type="text/javascript" src="../lib/angel/MV.js"></script>
+        <script type="text/javascript" src="OBJParser.js"></script>
+        <script type="text/javascript" src="../lib/angel/webgl-utils.js"></script>
+        <script type="text/javascript" src="GLBuffer.js"></script>
+        <script type="text/javascript" src="project.js"></script>
+</body></html>
