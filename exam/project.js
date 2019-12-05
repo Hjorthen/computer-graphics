@@ -3,19 +3,6 @@
 /** @type {WebGLRenderingContext} */
 var gl;
 
-function PrintTransform(v, m)
-{
-    console.log("Before transform:\n", v)
-    let vp = v.slice();
-    for(i=0;i<v.length;++i)
-    {
-        if(v[i].length < 4)
-            v[i].push(1);
-        vp[i] = mult(m, v[i]);
-    }
-    console.log("After transform:\n", vp);
-}
-
 function CreateFrameBufferObject(gl, width, height)
 {
     var framebuffer = gl.createFramebuffer(); 
@@ -24,7 +11,7 @@ function CreateFrameBufferObject(gl, width, height)
     gl.bindRenderbuffer(gl.RENDERBUFFER, renderbuffer);
     gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, width, height);
     var shadowMap = gl.createTexture();
-    gl.activeTexture(gl.TEXTURE1); 
+    gl.activeTexture(gl.TEXTURE0); 
     gl.bindTexture(gl.TEXTURE_2D, shadowMap);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
@@ -41,7 +28,6 @@ function CreateFrameBufferObject(gl, width, height)
     framebuffer.height = height;
     return framebuffer;
 }
-
 function Setup()
 {
    window.canvas = document.getElementById("c");
@@ -63,7 +49,6 @@ function InitShaderParams(program)
     program.vPos = gl.getAttribLocation(program, "a_Position");
     program.scale = gl.getUniformLocation(program, "scale");
     program.H = gl.getUniformLocation(program, "H");
-
 }
 
 function SetupSliders()
@@ -101,9 +86,12 @@ function Run()
 
     InitGLParameters()
     window.terrainProgram = initShaders(gl, "vertex-shader-terrain", "fragment-shader-terrain")
-    window.shadowProgram = initShaders(gl, "vertex-shader-terrain", "fragment-shader-shadowmap");
+    window.shadowProgram = initShaders(gl, "vertex-shader-shadowmap", "fragment-shader-shadowmap");
     gl.useProgram(terrainProgram);
     InitShaderParams(terrainProgram);
+    terrainProgram.depthTexture = gl.getUniformLocation(terrainProgram, "shadowMap");
+    terrainProgram.lightMVP = gl.getUniformLocation(terrainProgram, "lightMVP");
+    gl.uniform1f(terrainProgram.depthTexture, 0);
     InitShaderParams(shadowProgram);
     LoadObjects();
 
@@ -111,20 +99,20 @@ function Run()
     let angle = 45.0;
     let cameraPos = vec3(0, 0, sliders.height); 
     // up vector takes into account that Z is height
-    window.cameraV = lookAt(cameraPos, vec3(2, 2, 0), vec3(0, 0, 1));
     window.frameBuffer = CreateFrameBufferObject(gl, 256, 256);
      
     window.requestAnimationFrame(Draw);
 }
-function heightChanged(val)
+
+function getCameraViewMatrix(angle)
 {
-    let cameraPos = vec3(0, 0, val); 
-    // up vector takes into account that Z is height
-    var cameraV = lookAt(cameraPos, vec3(2, 2, 0), vec3(0, 0, 1));
-    console.log("Height changed.");
+    const d = 1.5;
+    const height = 1;
+    let cameraPosition = vec3(d * Math.cos(radians(angle)) + 1, d * Math.sin(radians(angle)) + 1, height);
+    return lookAt(cameraPosition, vec3(1.0, 1.0, 0.5), vec3(0, 0, 1));
 }
 
-function DrawScene(MV, P)
+function DrawScene(MV, P, shadowMVP)
 {
     gl.useProgram(terrainProgram);
     gl.clearColor(135/255.0, 206/255.0, 235/255.0, 1.0);
@@ -132,6 +120,7 @@ function DrawScene(MV, P)
 
     gl.uniform1f(terrainProgram.scale, sliders.noise);
     gl.uniform1f(terrainProgram.H, sliders.smoothness);
+    gl.uniformMatrix4fv(terrainProgram.lightMVP, false, flatten(shadowMVP));
     gl.uniformMatrix4fv(terrainProgram.P, false, flatten(P));
     gl.uniformMatrix4fv(terrainProgram.MV, false,  flatten(MV));
     Bind(quad, terrainProgram);
@@ -159,9 +148,14 @@ function DrawShadowmap(MV, P)
 
 function Draw()
 {
+    window.cameraV = getCameraViewMatrix(sliders.height);
     let scaleM = scalem(2, 2, 1);
-    DrawShadowmap(mult(cameraV, scaleM), cameraP);
-    DrawScene(mult(cameraV, scaleM), cameraP);
+    let MV = mult(cameraV, scaleM);
+    let shadowV = getCameraViewMatrix(0);
+    let shadowMV = mult(shadowV, scaleM);
+    DrawShadowmap(shadowMV, cameraP);
+    let shadowMVP = mult(cameraP, shadowMV);
+    DrawScene(MV, cameraP, shadowMVP);
     window.requestAnimationFrame(Draw);
 }
 
@@ -169,6 +163,7 @@ function CreatePlane(n)
 {
     let vertices = []
     let indices = []
+    let uvs = []
     let delta = 1 / n;
     for(let x=0;x<n;++x)
     {
@@ -302,3 +297,17 @@ function setupWebGL(canvas) {
 }
 
 onload= Run();
+ 
+function PrintTransform(v, m)
+{
+    console.log("Before transform:\n", v)
+    let vp = v.slice();
+    for(i=0;i<v.length;++i)
+    {
+        if(v[i].length < 4)
+            v[i].push(1);
+        vp[i] = mult(m, v[i]);
+    }
+    console.log("After transform:\n", vp);
+}
+
