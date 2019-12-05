@@ -18,7 +18,7 @@
             <input id="rotation" type="range" min="0" max="360" value="0">
         </div>
         <div>
-            I used the Linear-Mipmap-Linear setting for minification. 
+            I used the Linear-Mipmap-Linear setting for minification, as the mipmapping provides good sapling when downscaling, including linear includes linear interpolation between the samples as well. This prevents jagged edges on the image as everything is averaged out. The downside is that the extra mipmaps take up more texture memory and the linear sampling requires more texture samples and are thereby slower. but for a simple application like this it is prefered as the extra cost is insignificant. 
         </div>
         <script id="vertex-shader" type="x-shader/x-vertex">
             attribute vec4 a_Position;
