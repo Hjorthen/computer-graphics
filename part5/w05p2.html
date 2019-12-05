@@ -22,6 +22,9 @@
             <b>Light</b>
             <input id="Emission" type="range" min="0" max="1" value="1" step="0.01">Emission</input><br>
         </div>
+        <div>
+            The normals are exported from blender along with the vertices. These normals are per-vertex and are normalized in the fragment shader for smooth shading by interpolation. 
+        </div>
         <script id="vertex-shader" type="x-shader/x-vertex">
             attribute vec4 a_Position;
             attribute vec4 a_Normal;
