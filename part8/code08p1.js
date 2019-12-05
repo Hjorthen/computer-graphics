@@ -11,14 +11,6 @@ var Renderer = {
     Setup()
     {
         this.canvas = document.getElementById("c");
-        this.mode = document.getElementById("modePicker");
-        // Rotation settings
-        this.rotateCheckbox = document.getElementById("rotate");
-        this.rotation = 0;
-        this.rotationSlider = document.getElementById("rotation");
-        this.rotationSlider.oninput = function(e) {
-                this.rotation = this.rotationSlider.value;
-        }.bind(this);
 
         this.gl = setupWebGL(this.canvas);
         this.program = initShaders(this.gl, "vertex-shader", "fragment-shader");
