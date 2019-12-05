@@ -1,3 +1,8 @@
+"use strict";
+
+/** @type {WebGLRenderingContext} */
+var gl;
+
 function PrintTransform(v, m)
 {
     console.log("Before transform:\n", v)
@@ -11,9 +16,35 @@ function PrintTransform(v, m)
     console.log("After transform:\n", vp);
 }
 
+function CreateFrameBufferObject(gl, width, height)
+{
+    var framebuffer = gl.createFramebuffer(); 
+    gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer); 
+    var renderbuffer = gl.createRenderbuffer();
+    gl.bindRenderbuffer(gl.RENDERBUFFER, renderbuffer);
+    gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, width, height);
+    var shadowMap = gl.createTexture();
+    gl.activeTexture(gl.TEXTURE1); 
+    gl.bindTexture(gl.TEXTURE_2D, shadowMap);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    framebuffer.texture = shadowMap;
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, shadowMap, 0);
+    gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, renderbuffer);
+    var status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
+    if (status !== gl.FRAMEBUFFER_COMPLETE) {
+    console.log('Framebuffer object is incomplete: ' + status.toString()); }
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+    framebuffer.width = width;
+    framebuffer.height = height;
+    return framebuffer;
+}
+
 function Setup()
 {
-   canvas = document.getElementById("c");
+   window.canvas = document.getElementById("c");
    /** @type {WebGLRenderingContext} */
    gl = setupWebGL(canvas)
 }
@@ -25,48 +56,111 @@ function InitGLParameters()
     gl.enable(gl.DEPTH_TEST);
     //gl.enable(gl.CULL_FACE);
 }
-function InitShaderParams()
+function InitShaderParams(program)
 {
-    terrainProgram.P = gl.getUniformLocation(terrainProgram,  "P");
-    terrainProgram.MV = gl.getUniformLocation(terrainProgram,  "MV");
-    terrainProgram.vPos = gl.getAttribLocation(terrainProgram, "a_Position");
+    program.P = gl.getUniformLocation(program,  "P");
+    program.MV = gl.getUniformLocation(program,  "MV");
+    program.vPos = gl.getAttribLocation(program, "a_Position");
+    program.scale = gl.getUniformLocation(program, "scale");
+    program.H = gl.getUniformLocation(program, "H");
+
 }
+
+function SetupSliders()
+{
+    window.sliders = {}
+    for(var s of document.getElementsByTagName("input"))
+    {
+        if(s.getAttribute("type") == "range")
+        {
+            sliders[s.id] = s.value;
+        }
+        s.addEventListener('input', function(e)
+            {
+                sliders[this.id] = this.value;
+                let callback = window[this.id + "Changed"];
+                if(typeof callback != 'undefined')
+                    callback(this.value);
+            }
+        )
+    }
+}
+
+
 
 function LoadObjects()
 {
-    quad = CreatePlane(10);
+    window.quad = CreatePlane(100);
     Commit(quad);
 }
 
 function Run()
 {
     Setup();
+    SetupSliders();
 
     InitGLParameters()
-    terrainProgram = initShaders(gl, "vertex-shader-terrain", "fragment-shader-terrain")
+    window.terrainProgram = initShaders(gl, "vertex-shader-terrain", "fragment-shader-terrain")
+    window.shadowProgram = initShaders(gl, "vertex-shader-terrain", "fragment-shader-shadowmap");
     gl.useProgram(terrainProgram);
-    InitShaderParams();
+    InitShaderParams(terrainProgram);
+    InitShaderParams(shadowProgram);
     LoadObjects();
 
-    P = perspective(90, 3, 1, -2);
-    V = lookAt(vec3(0.5, 0.5, 1), vec3(0.5, 0.5, 0), vec3(0, 1, 0));
-    gl.uniformMatrix4fv(terrainProgram.P, false,  flatten(P));
-    gl.uniformMatrix4fv(terrainProgram.MV, false,  flatten(V));
-   
+    window.cameraP = perspective(30, 3, 0.1, -2);
+    let angle = 45.0;
+    let cameraPos = vec3(0, 0, sliders.height); 
+    // up vector takes into account that Z is height
+    window.cameraV = lookAt(cameraPos, vec3(2, 2, 0), vec3(0, 0, 1));
+    window.frameBuffer = CreateFrameBufferObject(gl, 256, 256);
+     
     window.requestAnimationFrame(Draw);
 }
-
-function DrawScene()
+function heightChanged(val)
 {
+    let cameraPos = vec3(0, 0, val); 
+    // up vector takes into account that Z is height
+    var cameraV = lookAt(cameraPos, vec3(2, 2, 0), vec3(0, 0, 1));
+    console.log("Height changed.");
+}
+
+function DrawScene(MV, P)
+{
+    gl.useProgram(terrainProgram);
+    gl.clearColor(135/255.0, 206/255.0, 235/255.0, 1.0);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+    gl.uniform1f(terrainProgram.scale, sliders.noise);
+    gl.uniform1f(terrainProgram.H, sliders.smoothness);
+    gl.uniformMatrix4fv(terrainProgram.P, false, flatten(P));
+    gl.uniformMatrix4fv(terrainProgram.MV, false,  flatten(MV));
     Bind(quad, terrainProgram);
     gl.drawElements(gl.TRIANGLES, quad.indices.length, gl.UNSIGNED_SHORT, 0);
 }
 
-function Draw(MV, P)
+function DrawShadowmap(MV, P)
 {
-    this.gl.clearColor(1.0, 0.0, 0.0, 1.0);
-    this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
-    DrawScene();
+    gl.useProgram(shadowProgram);
+    // Set the MVP
+    gl.uniform1f(shadowProgram.scale, sliders.noise);
+    gl.uniform1f(shadowProgram.H, sliders.smoothness);
+    gl.uniformMatrix4fv(shadowProgram.P, false, flatten(P));
+    gl.uniformMatrix4fv(shadowProgram.MV, false,  flatten(MV));
+
+    gl.bindFramebuffer(gl.FRAMEBUFFER, frameBuffer)
+    gl.viewport(0, 0, frameBuffer.width, frameBuffer.height)
+    gl.clearColor(0.0, 0.0, 0.0, 0.0);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    Bind(quad, shadowProgram);
+    gl.drawElements(gl.TRIANGLES, quad.indices.length, gl.UNSIGNED_SHORT, 0);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.viewport(0, 0, canvas.width, canvas.height);
+}
+
+function Draw()
+{
+    DrawShadowmap(cameraV, cameraP);
+    DrawScene(cameraV, cameraP);
     window.requestAnimationFrame(Draw);
 }
 
@@ -74,14 +168,14 @@ function CreatePlane(n)
 {
     let vertices = []
     let indices = []
-    let delta = 1 / n;
-    for(x=0;x<n;++x)
+    let delta = 2 / n;
+    for(let x=0;x<n;++x)
     {
         let xPos = delta * x;
-        for(y=0;y<n;++y)
+        for(let y=0;y<n;++y)
         {
             let offset = vertices.length;
-            yPos = delta * y;
+            let yPos = delta * y;
             vertices.push(vec3(xPos, yPos, 0))
             vertices.push(vec3(xPos, yPos + delta, 0))
             vertices.push(vec3(xPos + delta, yPos, 0))
@@ -91,7 +185,7 @@ function CreatePlane(n)
                 1, 0, 2,
                 2, 3, 1
             ]
-            for(newIndex of newIndices)
+            for(let newIndex of newIndices)
             {
                 indices.push(newIndex + offset);
             }
@@ -105,7 +199,7 @@ function CreatePlane(n)
 function Commit(obj)
 {
     // Key-value pairs of the objects to upload
-    buffers = {
+    let buffers = {
         vPos : {
             name : 'vertices',
         },
@@ -153,7 +247,7 @@ function Commit(obj)
 }
 function Bind(obj, attribs)
 {
-    buffers = {
+    let buffers = {
         vPos : {
             name :  'vertices',
             size : 3
