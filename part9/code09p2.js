@@ -22,7 +22,6 @@ var Renderer = {
     Setup()
     {
         this.canvas = document.getElementById("c");
-        this.mode = document.getElementById("modePicker");
         // Rotation settings
         this.rotateCheckbox = document.getElementById("rotate");
         this.rotation = 0;
@@ -352,7 +351,6 @@ var Renderer = {
         this.model.modelMatrix = translate(0, this.heightOffset, -3)
         let lightPos = vec3(2.0 * Math.sin(radians(this.rotation)), 2, 2.0 * Math.cos(radians(this.rotation)) -3);
         let lightMV = lookAt(lightPos, vec3(0, -2, -3), vec3(0, 1, 0))
-        console.log(lightPos + " " + this.rotation);
         this.DrawShadowmap(lightMV);
         let MV = lookAt(vec3(0, 1, 1), vec3(0, 0, -3), vec3(0, 1, 0))
         this.DrawScene(MV, lightPos, lightMV);
@@ -425,18 +423,6 @@ function setupWebGL(canvas) {
   return WebGLUtils.setupWebGL(canvas, { alpha: false });
 }
 
-perspectiveMenu = document.getElementById("perspective")
-perspectiveMenu.addEventListener("change", function() {
-    switch(perspectiveMenu.selectedIndex)
-    {
-        case 0:
-            Renderer.SetPerspective(true);
-            break;
-        case 1:
-            Renderer.SetPerspective(false);
-            break;
-    }
-});
 
 
 onload= Renderer.Run();

@@ -22,7 +22,6 @@ var Renderer = {
     Setup()
     {
         this.canvas = document.getElementById("c");
-        this.mode = document.getElementById("modePicker");
         // Rotation settings
         this.rotateCheckbox = document.getElementById("rotate");
         this.rotation = 0;
@@ -196,7 +195,7 @@ var Renderer = {
         gl.enable(gl.BLEND);
         gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
         gl.enable(gl.DEPTH_TEST);
-        gl.enable(gl.CULL_FACE);
+        //gl.enable(gl.CULL_FACE);
         gl.useProgram(this.groundProgram);
         
         this.SetPerspective(false);
@@ -381,19 +380,6 @@ var Renderer = {
 function setupWebGL(canvas) {
   return WebGLUtils.setupWebGL(canvas, { alpha: false });
 }
-
-perspectiveMenu = document.getElementById("perspective")
-perspectiveMenu.addEventListener("change", function() {
-    switch(perspectiveMenu.selectedIndex)
-    {
-        case 0:
-            Renderer.SetPerspective(true);
-            break;
-        case 1:
-            Renderer.SetPerspective(false);
-            break;
-    }
-});
 
 
 onload= Renderer.Run();
