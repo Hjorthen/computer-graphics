@@ -159,8 +159,9 @@ function DrawShadowmap(MV, P)
 
 function Draw()
 {
-    DrawShadowmap(cameraV, cameraP);
-    DrawScene(cameraV, cameraP);
+    let scaleM = scalem(2, 2, 1);
+    DrawShadowmap(mult(cameraV, scaleM), cameraP);
+    DrawScene(mult(cameraV, scaleM), cameraP);
     window.requestAnimationFrame(Draw);
 }
 
@@ -168,7 +169,7 @@ function CreatePlane(n)
 {
     let vertices = []
     let indices = []
-    let delta = 2 / n;
+    let delta = 1 / n;
     for(let x=0;x<n;++x)
     {
         let xPos = delta * x;
