@@ -10,31 +10,17 @@
             <option value="1">Perspective</option>
         </select>
         <div>
-Reflect on the theory of affine 
-transformations 
-and viewing 
-transformations by doing the following
-: 
-•
-List the transformation matrices that you used in Parts 1 and 2 
-(use 
-general expressions rather
- than 
-concrete numbers).
-[Angel 4.9, 5.3-
-5.5]
-•
-For each cube, w
-rite down a formula
- show
-ing
- how the matrices 
-were concatenated 
-to become the current transformation matrix 
-(CTM) that was used to transform the vertices in the vertex 
-shader.
- [Angel 4.10
--4.11]
+For the cube in part 1, two rotations were used. The first rotation rotated the cube 45 degrees around the Y-axis, causing it to be in dimetric view. It was then rotated around the X-axis to bring it into isometric view. No projection matrix was needed since the cube coordinates already were in   view volume coordinates.<br>
+    The transformation can be thought as:<br>
+    MV = Rx * Ry
+    <br>
+    where Rx is the rotation around X and Ry is the rotation around y.
+
+    <br>
+    For part 2, the same rotation matrices were used in addition to a translation matrix to place the perspectives adjecent to each other.  However, this time a projection matrix is also used to bring the final coordinates into the view volume. <br>
+        MVP = T * Rx * Ry<br>
+        The translation matrix is applied after the rotation since rotation is applied around the origin. For each of the cubes the transformation is (-3, 0, 3) along the x-axis. 
+
         </div>
         <script id="vertex-shader" type="x-shader/x-vertex">
             attribute vec4 a_Position;

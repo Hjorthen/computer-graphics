@@ -12,6 +12,7 @@ var Renderer = {
         this.canvas = document.getElementById("c");
         this.gl = setupWebGL(this.canvas);
         this.program = initShaders(this.gl, "vertex-shader", "fragment-shader");
+        this.drawMode = this.gl.LINE_STRIP;
     },
 
     DrawCube()
@@ -97,9 +98,6 @@ var Renderer = {
         gl.vertexAttribPointer(vPos, 3, gl.FLOAT, false, 0, 0);
         gl.enableVertexAttribArray(vPos);
         this.vertices = [];
-      
-        var cameraPosition = [0, 0, -5];
-
 
         var mv_matrix = mat4()
         mv_matrix = mult(mv_matrix, rotateX(-35.26))
@@ -108,36 +106,8 @@ var Renderer = {
         var mv = gl.getUniformLocation(this.program, "MV");
         gl.uniformMatrix4fv(mv, false, flatten(mv_matrix));
 
-
-        this.colors = [];
-        this.colorBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.colorBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, this.bufferSize, gl.STATIC_DRAW);
-        var vCol = gl.getAttribLocation(this.program, "a_Color");
-        gl.vertexAttribPointer(vCol, 4, gl.FLOAT, false, 0, 0);
-        gl.enableVertexAttribArray(vCol);
-
         this.DrawCube();
-        this.dotCounter = 0;
         window.requestAnimationFrame(function() {this.Draw()}.bind(this));
-    },
-
-    OnClear : function()
-    {
-       this.ClearCanvas(); 
-    },
-
-    ClearCanvas : function()
-    {
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, this.bufferSize, this.gl.STATIC_DRAW);
-        
-        this.pointsIndiceBuffer.Clear();
-        this.triangleIndiceBuffer.Clear();
-        this.circleIndiceBuffer.Clear();
-
-        this.vertices = [];
-        this.colors = [];
     },
 
     AddVertex : function(position, color)
@@ -146,21 +116,15 @@ var Renderer = {
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
         this.gl.bufferSubData(this.gl.ARRAY_BUFFER, sizeof['vec3']*vertexIndex, flatten([position]));
         this.vertices.push(position);
-
-        colorIndex = this.colors.length;
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colorBuffer);
-        this.gl.bufferSubData(this.gl.ARRAY_BUFFER, sizeof['vec4'] * colorIndex, flatten([color]));
-        this.colors.push(color);
         return vertexIndex;
     },
     Draw : function()
     {
-        //this.gl.clearColor(this.clearColor[0], this.clearColor[1], this.clearColor[2], this.clearColor[3]);
         this.gl.clearColor(0, 0, 0, 0);
         this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
 
         this.cubeBuffer.Bind();
-        this.gl.drawElements(this.gl.LINE_STRIP, this.cubeBuffer.Size(), this.gl.UNSIGNED_BYTE, 0);
+        this.gl.drawElements(this.drawMode, this.cubeBuffer.Size(), this.gl.UNSIGNED_BYTE, 0);
 
 
         window.requestAnimationFrame(function() {this.Draw()}.bind(this));
@@ -173,6 +137,17 @@ var Renderer = {
 */
 function setupWebGL(canvas) {
   return WebGLUtils.setupWebGL(canvas);
+}
+
+function toggleWireframe() {
+    if(Renderer.drawMode == Renderer.gl.LINE_STRIP)
+    {
+        Renderer.drawMode = Renderer.gl.TRIANGLE_FAN;
+    }
+    else
+    {
+        Renderer.drawMode = Renderer.gl.LINE_STRIP;
+    }
 }
 
 onload= Renderer.Run();
