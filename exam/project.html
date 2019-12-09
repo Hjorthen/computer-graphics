@@ -2,7 +2,7 @@
 <html><body>
         <div style="display: flex;">
             <div style="width: 600px">
-                <canvas id="c" width="600px" height="200px"></canvas>
+                <canvas id="c" width="600px" height="300px"></canvas>
             </div>
         </div>
         <div>
@@ -78,19 +78,38 @@
         uniform float H;
         uniform mat4 P;
         uniform mat4 MV;
+        uniform mat3 normMatrix;
         uniform mat4 lightMVP;
+        uniform mat3 shadowMV;
+
         varying float height;
+        varying float heightNoise;
         varying vec2 uv;
         varying vec4 lightPerspectivePosition;
+        // For diffuse shading
+        varying vec3 normal;
+        varying vec3 eyeDir;
+         
+        vec3 estimateNormal(vec3 position)
+        {
+            return normalize(vec3(fbm(scale * vec3(position.x - 0.01, position.yz), H) - fbm(scale * vec3(position.x + 0.01, position.yz), H), 
+                    fbm(scale * vec3(position.x, position.y - 0.01, position.z), H) - fbm(scale * vec3(position.x, position.y + 0.01, position.z), H), 
+                    2.0 * position.z)); 
+        }
+
         void main()
         {
             const bool use_fbm = true;
             float delta = use_fbm ? fbm(scale * a_Position.xyz, H) : pnoisenorm(scale * vec3(a_Position.xyz));
             height = delta;
+            heightNoise = pnoisenorm(10.0 * a_Position.xyz) * 0.05;
             vec4 transformedPosition = vec4(a_Position.xy, delta, 1);
             lightPerspectivePosition = lightMVP * transformedPosition;
             gl_Position = P * MV * transformedPosition;
             uv = a_Position.xy;
+
+            normal = normMatrix * estimateNormal(a_Position.xyz);
+            eyeDir = -normalize((MV * transformedPosition).xyz);
         }
         </script>
         <script id="fragment-shader-terrain" type="x-shader/x-fragment">
@@ -101,14 +120,24 @@
          
 
             uniform sampler2D shadowMap;
-             
+            float unpackDepth(const in vec4 rgbaDepth) {   
+            const vec4 bitShift = vec4(1.0, 1.0/256.0, 
+                                       1.0/(256.0*256.0), 
+                                       1.0/(256.0*256.0*256.0));   
+            return dot(rgbaDepth, bitShift); 
+            } 
             varying float height;
+            varying float heightNoise;
             varying vec2 uv;
             varying vec4 lightPerspectivePosition;
+            // Diffuse shading
+            varying vec3 normal;
+            varying vec3 eyeDir;
+            uniform vec3 lightPosition;
             void main()
             {
                 vec3 color;
-                if(height > 0.66)
+                if((height + abs(heightNoise)) > 0.66)
                     color = snow;
                 else if(height > 0.5)
                     color = ground; 
@@ -116,12 +145,20 @@
                     color = grass;
 
                 vec3 lightNDC = 0.5 * (lightPerspectivePosition.xyz / lightPerspectivePosition.w) + 0.5;
-                float shadowDepth = texture2D(shadowMap, lightNDC.xy).r;
+                float shadowDepth = unpackDepth(texture2D(shadowMap, lightNDC.xy));
                 float shaderContrib = 1.0;
-                if(shadowDepth + 0.002 < lightNDC.z)
+                if(shadowDepth + 0.0015 < lightNDC.z)
                     shaderContrib = 0.2;
-                gl_FragColor = vec4(color * shaderContrib, 1);
-            }
+                
+
+                // Diffuse
+                float diffuseFactor = max(dot(normalize(lightPosition), normalize(normal)), 0.0); 
+                //gl_FragColor = vec4(diffuseFactor, 0, 0, 1);
+                //gl_FragColor = vec4(normal, 1);
+                vec3 diffuse = color * diffuseFactor;
+                vec3 ambient = color * 0.2;
+                gl_FragColor = vec4(color  * shaderContrib, 1); 
+             }
         </script>
         <script id="vertex-shader-shadowmap" type="x-shader/x-fragment">
         const float lacunarity = 2.0;
@@ -204,7 +241,11 @@
             varying vec2 uv;
             void main()
             {
-                gl_FragColor = vec4(gl_FragCoord.z, 0, 0, 1.0);
+                const vec4 bitShift = vec4(1.0, 256.0, 256.0*256.0, 256.0*256.0*256.0); 
+                const vec4 bitMask = vec4(1.0/256.0, 1.0/256.0, 1.0/256.0, 0.0);
+                vec4 rgbaDepth = fract(gl_FragCoord.z*bitShift);
+                rgbaDepth -= rgbaDepth.gbaa*bitMask;
+                gl_FragColor = rgbaDepth;//vec4(gl_FragCoord.z, 0, 0, 1.0);
             }
         </script>
         <script type="text/javascript" src="Light.js"></script>

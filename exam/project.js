@@ -37,10 +37,7 @@ function Setup()
 
 function InitGLParameters()
 {
-    gl.enable(gl.BLEND);
-    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
     gl.enable(gl.DEPTH_TEST);
-    //gl.enable(gl.CULL_FACE);
 }
 function InitShaderParams(program)
 {
@@ -91,11 +88,13 @@ function Run()
     InitShaderParams(terrainProgram);
     terrainProgram.depthTexture = gl.getUniformLocation(terrainProgram, "shadowMap");
     terrainProgram.lightMVP = gl.getUniformLocation(terrainProgram, "lightMVP");
+    terrainProgram.lightPosition = gl.getUniformLocation(terrainProgram, "lightPosition");
+    terrainProgram.normMatrix = gl.getUniformLocation(terrainProgram, "normMatrix");
     gl.uniform1f(terrainProgram.depthTexture, 0);
     InitShaderParams(shadowProgram);
     LoadObjects();
 
-    window.cameraP = perspective(30, 3, 0.1, -2);
+    window.cameraP = perspective(30, 2, 0.1, -2);
     let angle = 45.0;
     let cameraPos = vec3(0, 0, sliders.height); 
     // up vector takes into account that Z is height
@@ -104,11 +103,16 @@ function Run()
     window.requestAnimationFrame(Draw);
 }
 
-function getCameraViewMatrix(angle)
+function getCameraPosition(angle)
 {
     const d = 1.5;
     const height = 1;
-    let cameraPosition = vec3(d * Math.cos(radians(angle)) + 1, d * Math.sin(radians(angle)) + 1, height);
+    return vec3(d * Math.cos(radians(angle)) + 1, d * Math.sin(radians(angle)) + 1, height);
+}
+
+function getCameraViewMatrix(angle)
+{
+    let cameraPosition = getCameraPosition(angle);
     return lookAt(cameraPosition, vec3(1.0, 1.0, 0.5), vec3(0, 0, 1));
 }
 
@@ -123,6 +127,8 @@ function DrawScene(MV, P, shadowMVP)
     gl.uniformMatrix4fv(terrainProgram.lightMVP, false, flatten(shadowMVP));
     gl.uniformMatrix4fv(terrainProgram.P, false, flatten(P));
     gl.uniformMatrix4fv(terrainProgram.MV, false,  flatten(MV));
+    let nMV = normalMatrix(MV, true);
+    gl.uniformMatrix3fv(terrainProgram.normMatrix, false, flatten(nMV));
     Bind(quad, terrainProgram);
     gl.drawElements(gl.TRIANGLES, quad.indices.length, gl.UNSIGNED_SHORT, 0);
 }
@@ -149,6 +155,9 @@ function DrawShadowmap(MV, P)
 function Draw()
 {
     window.cameraV = getCameraViewMatrix(sliders.height);
+    let lightDir = subtract(getCameraPosition(sliders.height), vec3(1.0, 1.0, 0.5));
+    gl.uniform3fv(terrainProgram.lightPosition, lightDir);
+
     let scaleM = scalem(2, 2, 1);
     let MV = mult(cameraV, scaleM);
     let shadowV = getCameraViewMatrix(0);
