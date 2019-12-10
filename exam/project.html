@@ -136,20 +136,38 @@
             varying vec3 normal;
             varying vec3 eyeDir;
             uniform vec3 lightPosition;
+            const vec2 texmapScale = vec2(1.0 / 512.0, 1.0 / 512.0);
+
+            float offset_lookup(vec3 shadowCoord, vec2 offset)
+            {
+                return unpackDepth(texture2D(shadowMap, shadowCoord.xy + offset * texmapScale));
+            }
+        
+
             void main()
             {
                 vec3 color;
                 if((height + abs(heightNoise)) > 0.66)
                     color = snow;
-                else if(height - abs(heightNoise) * 0.1  > 0.5)
+                else if(height - abs(heightNoise) * 0.1  > 0.45)
                     color = ground; 
                 else 
                     color = grass;
 
                 vec3 lightNDC = 0.5 * (lightPerspectivePosition.xyz / lightPerspectivePosition.w) + 0.5;
-                float shadowDepth = unpackDepth(texture2D(shadowMap, lightNDC.xy));
+                float sum = 0.0;
+                for(float y=-1.5;y<=1.5;y+=1.0)
+                {
+                    for(float x=-1.5;x<=1.5;x+=1.0)
+                    {
+                        sum += offset_lookup(lightNDC, vec2(x, y));
+                    }
+                }
+
+                float shadowDepth = sum / 16.0;
+                //shadowDepth = unpackDepth(texture2D(shadowMap, lightNDC.xy));
                 float shaderContrib = 1.0;
-                if(shadowDepth + 0.0015 < lightNDC.z)
+                if(shadowDepth + 0.0010 < lightNDC.z)
                     shaderContrib = 0.2;
                 
 
