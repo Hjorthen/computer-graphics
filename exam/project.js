@@ -68,8 +68,6 @@ function SetupSliders()
     }
 }
 
-
-
 function LoadObjects()
 {
     window.quad = CreatePlane(100);
@@ -155,7 +153,7 @@ function DrawShadowmap(MV, P)
 function Draw()
 {
     window.cameraV = getCameraViewMatrix(sliders.height);
-    let lightDir = subtract(getCameraPosition(sliders.height), vec3(1.0, 1.0, 0.5));
+    let lightDir = subtract(getCameraPosition(0), vec3(1.0, 1.0, 0.5));
     gl.uniform3fv(terrainProgram.lightPosition, lightDir);
 
     let scaleM = scalem(2, 2, 1);

@@ -102,13 +102,13 @@
             const bool use_fbm = true;
             float delta = use_fbm ? fbm(scale * a_Position.xyz, H) : pnoisenorm(scale * vec3(a_Position.xyz));
             height = delta;
-            heightNoise = pnoisenorm(10.0 * a_Position.xyz) * 0.05;
+            heightNoise = pnoisenorm(20.0 * a_Position.xyz) * 0.05;
             vec4 transformedPosition = vec4(a_Position.xy, delta, 1);
             lightPerspectivePosition = lightMVP * transformedPosition;
             gl_Position = P * MV * transformedPosition;
             uv = a_Position.xy;
 
-            normal = normMatrix * estimateNormal(a_Position.xyz);
+            normal = estimateNormal(a_Position.xyz);
             eyeDir = -normalize((MV * transformedPosition).xyz);
         }
         </script>
@@ -139,7 +139,7 @@
                 vec3 color;
                 if((height + abs(heightNoise)) > 0.66)
                     color = snow;
-                else if(height > 0.5)
+                else if(height - abs(heightNoise) * 0.1  > 0.5)
                     color = ground; 
                 else 
                     color = grass;
@@ -153,11 +153,10 @@
 
                 // Diffuse
                 float diffuseFactor = max(dot(normalize(lightPosition), normalize(normal)), 0.0); 
-                //gl_FragColor = vec4(diffuseFactor, 0, 0, 1);
-                //gl_FragColor = vec4(normal, 1);
+                float t = dot(normalize(lightPosition), normalize(normal));
                 vec3 diffuse = color * diffuseFactor;
-                vec3 ambient = color * 0.2;
-                gl_FragColor = vec4(color  * shaderContrib, 1); 
+                vec3 ambient = color * 0.8;
+                gl_FragColor = vec4((diffuse + ambient)  * shaderContrib, 1); 
              }
         </script>
         <script id="vertex-shader-shadowmap" type="x-shader/x-fragment">
