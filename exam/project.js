@@ -55,16 +55,22 @@ function SetupSliders()
     {
         if(s.getAttribute("type") == "range")
         {
-            sliders[s.id] = s.value;
-        }
+            sliders[s.id] = {}
+            sliders[s.id].value = s.value;
+            sliders[s.id].setValue = function(v)
+            {
+                this.value = v;
+                sliders[this.id].value = v;
+            }.bind(s);
         s.addEventListener('input', function(e)
             {
-                sliders[this.id] = this.value;
+                sliders[this.id].value = this.value;
                 let callback = window[this.id + "Changed"];
                 if(typeof callback != 'undefined')
                     callback(this.value);
             }
         )
+        }
     }
 }
 
@@ -78,6 +84,7 @@ function Run()
 {
     Setup();
     SetupSliders();
+    window.rotateCheckbox = document.getElementById("rotate");
 
     InitGLParameters()
     window.terrainProgram = initShaders(gl, "vertex-shader-terrain", "fragment-shader-terrain")
@@ -94,9 +101,9 @@ function Run()
 
     window.cameraP = perspective(30, 2, 0.1, -2);
     let angle = 45.0;
-    let cameraPos = vec3(0, 0, sliders.height); 
+    let cameraPos = vec3(0, 0, sliders.rotation.value); 
     // up vector takes into account that Z is height
-    window.frameBuffer = CreateFrameBufferObject(gl, 256, 256);
+    window.frameBuffer = CreateFrameBufferObject(gl, 512, 512);
      
     window.requestAnimationFrame(Draw);
 }
@@ -120,8 +127,8 @@ function DrawScene(MV, P, shadowMVP)
     gl.clearColor(135/255.0, 206/255.0, 235/255.0, 1.0);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    gl.uniform1f(terrainProgram.scale, sliders.noise);
-    gl.uniform1f(terrainProgram.H, sliders.smoothness);
+    gl.uniform1f(terrainProgram.scale, sliders.noise.value);
+    gl.uniform1f(terrainProgram.H, sliders.smoothness.value);
     gl.uniformMatrix4fv(terrainProgram.lightMVP, false, flatten(shadowMVP));
     gl.uniformMatrix4fv(terrainProgram.P, false, flatten(P));
     gl.uniformMatrix4fv(terrainProgram.MV, false,  flatten(MV));
@@ -135,8 +142,8 @@ function DrawShadowmap(MV, P)
 {
     gl.useProgram(shadowProgram);
     // Set the MVP
-    gl.uniform1f(shadowProgram.scale, sliders.noise);
-    gl.uniform1f(shadowProgram.H, sliders.smoothness);
+    gl.uniform1f(shadowProgram.scale, sliders.noise.value);
+    gl.uniform1f(shadowProgram.H, sliders.smoothness.value);
     gl.uniformMatrix4fv(shadowProgram.P, false, flatten(P));
     gl.uniformMatrix4fv(shadowProgram.MV, false,  flatten(MV));
 
@@ -152,10 +159,17 @@ function DrawShadowmap(MV, P)
 
 function Draw()
 {
-    window.cameraV = getCameraViewMatrix(sliders.height);
+    // Update light position (static)
     let lightDir = subtract(getCameraPosition(0), vec3(1.0, 1.0, 0.5));
     gl.uniform3fv(terrainProgram.lightPosition, lightDir);
 
+    // Rotate if needed
+    if(rotateCheckbox.checked)
+    {
+        sliders.rotation.setValue((sliders.rotation.value + 1)%360); 
+    }
+
+    window.cameraV = getCameraViewMatrix(sliders.rotation.value);
     let scaleM = scalem(2, 2, 1);
     let MV = mult(cameraV, scaleM);
     let shadowV = getCameraViewMatrix(0);

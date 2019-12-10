@@ -7,15 +7,18 @@
         </div>
         <div>
             Noise:
-            <input type="range" min="0" step="0.5" max="10" id="noise">
+            <input type="range" min="0" step="0.5" max="10" value="4" id="noise">
             Smooth:
-            <input type="range" min="0.0" step="0.05" max="1.0" id="smoothness">
-            Height:
-            <input type="range" min="1" step="10" value="0" max="360" id="height">
+            <input type="range" min="0.0" step="0.05" max="1.0" value="1.0" id="smoothness">
+        </div>
+        <div>
+            Rotation:
+            <input type="range" min="1" step="10" value="0" max="360" value="51" id="rotation">
+            Rotate <input type="checkbox" id="rotate" checked>
         </div>
         <script id="vertex-shader-terrain" type="x-shader/x-vertex">
         const float lacunarity = 2.0;
-        const int octaves = 8;
+        const int octaves = 7;
          
         float permute(float x) { return mod(34.0*x*x + x, 289.0); }
 
@@ -115,9 +118,8 @@
         <script id="fragment-shader-terrain" type="x-shader/x-fragment">
             precision mediump float;
             const vec3 snow = vec3(203, 214, 206)/255.0;        
-            const vec3 ground = vec3(89, 52, 27)/255.0;
+            const vec3 ground = vec3(80, 53, 37)/255.0;
             const vec3 grass = vec3(56, 112, 0)/255.0;
-         
 
             uniform sampler2D shadowMap;
             float unpackDepth(const in vec4 rgbaDepth) {   
@@ -161,7 +163,7 @@
         </script>
         <script id="vertex-shader-shadowmap" type="x-shader/x-fragment">
         const float lacunarity = 2.0;
-        const int octaves = 8;
+        const int octaves = 7;
          
         float permute(float x) { return mod(34.0*x*x + x, 289.0); }
 
