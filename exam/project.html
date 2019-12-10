@@ -7,7 +7,7 @@
         </div>
         <div>
             Noise:
-            <input type="range" min="0" step="0.5" max="10" value="4" id="noise">
+            <input type="range" min="0" step="0.25" max="5" value="4" id="noise">
             Smooth:
             <input type="range" min="0.0" step="0.05" max="1.0" value="1.0" id="smoothness">
         </div>
@@ -20,47 +20,73 @@
         const float lacunarity = 2.0;
         const int octaves = 7;
          
-        float permute(float x) { return mod(34.0*x*x + x, 289.0); }
-
-        float get_index(vec3 pi) { return permute(pi.x + permute(pi.y + permute(pi.z))); }
-        
-        vec3 pweights(vec3 t) { return t*t*t*(t*(t*6.0 - 15.0) + 10.0); }
-
-        vec3 gradient(float idx)
-        {
-          float i = mod(idx, 12.0);
-          i = i < 0.0 ? i + 12.0 : i;
-          vec2 bits = mod(vec2(i, floor(i*0.5)), 2.0);
-          vec2 signs = mix(vec2(1.0), vec2(-1.0), step(0.5, bits));
-          vec3 G;
-          G.x = i < 7.5 ? signs.x : 0.0;
-          G.y = i < 3.5 ? signs.y : (i > 7.5 ? signs.x : 0.0);
-          G.z = i > 3.5 ? signs.y : 0.0;
-          return G;
+        // perlin simplex from: https://github.com/stegu/webgl-noise/blob/master/src/noise2D.glsl
+        vec3 mod289(vec3 x) {
+        return x - floor(x * (1.0 / 289.0)) * 289.0;
         }
 
-        float pnoise(vec3 p)
-        {
-          vec3 pi0 = floor(p);
-          vec3 uvw = p - pi0;
-          vec3 weights = pweights(uvw);
+        vec2 mod289(vec2 x) {
+        return x - floor(x * (1.0 / 289.0)) * 289.0;
+        }
 
-          float noise_sum = 0.0;
-          for(float i = 0.0; i < 7.5; ++i)
-          {
-            vec3 corner = mod(vec3(i, floor(i*0.5), floor(i*0.25)), 2.0);
-            vec3 pi = pi0 + corner;
-            vec3 w = mix(1.0 - weights, weights, step(0.5, corner));
-            float d = dot(uvw - corner, gradient(get_index(pi)));
-            noise_sum += w.x*w.y*w.z*d;
-          }
-          return noise_sum;
+        vec3 permute(vec3 x) {
+        return mod289(((x*34.0)+1.0)*x);
         }
-        float pnoisenorm(vec3 point)
+
+        float snoise(vec2 v)
         {
-            return pnoise(point) * 0.5 + 0.5; 
+        const vec4 C = vec4(0.211324865405187,  // (3.0-sqrt(3.0))/6.0
+                          0.366025403784439,  // 0.5*(sqrt(3.0)-1.0)
+                         -0.577350269189626,  // -1.0 + 2.0 * C.x
+                          0.024390243902439); // 1.0 / 41.0
+        // First corner
+        vec2 i  = floor(v + dot(v, C.yy) );
+        vec2 x0 = v -   i + dot(i, C.xx);
+
+        // Other corners
+        vec2 i1;
+        //i1.x = step( x0.y, x0.x ); // x0.x > x0.y ? 1.0 : 0.0
+        //i1.y = 1.0 - i1.x;
+        i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
+        // x0 = x0 - 0.0 + 0.0 * C.xx ;
+        // x1 = x0 - i1 + 1.0 * C.xx ;
+        // x2 = x0 - 1.0 + 2.0 * C.xx ;
+        vec4 x12 = x0.xyxy + C.xxzz;
+        x12.xy -= i1;
+
+        // Permutations
+        i = mod289(i); // Avoid truncation effects in permutation
+        vec3 p = permute( permute( i.y + vec3(0.0, i1.y, 1.0 ))
+            + i.x + vec3(0.0, i1.x, 1.0 ));
+
+        vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy), dot(x12.zw,x12.zw)), 0.0);
+        m = m*m ;
+        m = m*m ;
+
+        // Gradients: 41 points uniformly over a line, mapped onto a diamond.
+        // The ring size 17*17 = 289 is close to a multiple of 41 (41*7 = 287)
+
+        vec3 x = 2.0 * fract(p * C.www) - 1.0;
+        vec3 h = abs(x) - 0.5;
+        vec3 ox = floor(x + 0.5);
+        vec3 a0 = x - ox;
+
+        // Normalise gradients implicitly by scaling m
+        // Approximation of: m *= inversesqrt( a0*a0 + h*h );
+        m *= 1.79284291400159 - 0.85373472095314 * ( a0*a0 + h*h );
+
+        // Compute final noise value at P
+        vec3 g;
+        g.x  = a0.x  * x0.x  + h.x  * x0.y;
+        g.yz = a0.yz * x12.xz + h.yz * x12.yw;
+        return 130.0 * dot(m, g);
         }
-        float fbm(vec3 point, float H)
+        // End Perlin
+        float pnoisenorm(vec2 point)
+        {
+            return snoise(point) * 0.5 + 0.5; 
+        }
+        float fbm(vec2 point, float H)
         {
             float result = 0.0;
             float max = 0.0;
@@ -87,6 +113,7 @@
 
         varying float height;
         varying float heightNoise;
+        varying float textureNoise;
         varying vec2 uv;
         varying vec4 lightPerspectivePosition;
         // For diffuse shading
@@ -95,17 +122,18 @@
          
         vec3 estimateNormal(vec3 position)
         {
-            return normalize(vec3(fbm(scale * vec3(position.x - 0.01, position.yz), H) - fbm(scale * vec3(position.x + 0.01, position.yz), H), 
-                    fbm(scale * vec3(position.x, position.y - 0.01, position.z), H) - fbm(scale * vec3(position.x, position.y + 0.01, position.z), H), 
+            return normalize(vec3(fbm(scale * vec2(position.x - 0.01, position.y), H) - fbm(scale * vec2(position.x + 0.01, position.y), H), 
+                    fbm(scale * vec2(position.x, position.y - 0.01), H) - fbm(scale * vec2(position.x, position.y + 0.01), H), 
                     2.0 * position.z)); 
         }
 
         void main()
         {
             const bool use_fbm = true;
-            float delta = use_fbm ? fbm(scale * a_Position.xyz, H) : pnoisenorm(scale * vec3(a_Position.xyz));
+            float delta = use_fbm ? fbm(scale * a_Position.xy, H) : pnoisenorm(scale * a_Position.xy);
             height = delta;
-            heightNoise = pnoisenorm(20.0 * a_Position.xyz) * 0.05;
+            heightNoise = pnoisenorm(20.0 * a_Position.xy) * 0.05;
+            textureNoise = pnoisenorm(64.0 * a_Position.xy) * 0.5 + 0.5;
             vec4 transformedPosition = vec4(a_Position.xy, delta, 1);
             lightPerspectivePosition = lightMVP * transformedPosition;
             gl_Position = P * MV * transformedPosition;
@@ -130,6 +158,7 @@
             } 
             varying float height;
             varying float heightNoise;
+            varying float textureNoise;
             varying vec2 uv;
             varying vec4 lightPerspectivePosition;
             // Diffuse shading
@@ -148,11 +177,11 @@
             {
                 vec3 color;
                 if((height + abs(heightNoise)) > 0.66)
-                    color = snow;
-                else if(height - abs(heightNoise) * 0.1  > 0.45)
-                    color = ground; 
+                    color = snow * textureNoise;
+                else if(height + abs(heightNoise) > 0.4)
+                    color = ground * ((textureNoise - 0.5) * 0.5 + 0.75); 
                 else 
-                    color = grass;
+                    color = grass * textureNoise;
 
                 vec3 lightNDC = 0.5 * (lightPerspectivePosition.xyz / lightPerspectivePosition.w) + 0.5;
                 float sum = 0.0;
@@ -177,53 +206,80 @@
                 vec3 diffuse = color * diffuseFactor;
                 vec3 ambient = color * 0.8;
                 gl_FragColor = vec4((diffuse + ambient)  * shaderContrib, 1); 
+                //gl_FragColor = vec4(height, 0, 0, 1);
              }
         </script>
         <script id="vertex-shader-shadowmap" type="x-shader/x-fragment">
         const float lacunarity = 2.0;
         const int octaves = 7;
-         
-        float permute(float x) { return mod(34.0*x*x + x, 289.0); }
-
-        float get_index(vec3 pi) { return permute(pi.x + permute(pi.y + permute(pi.z))); }
-        
-        vec3 pweights(vec3 t) { return t*t*t*(t*(t*6.0 - 15.0) + 10.0); }
-
-        vec3 gradient(float idx)
-        {
-          float i = mod(idx, 12.0);
-          i = i < 0.0 ? i + 12.0 : i;
-          vec2 bits = mod(vec2(i, floor(i*0.5)), 2.0);
-          vec2 signs = mix(vec2(1.0), vec2(-1.0), step(0.5, bits));
-          vec3 G;
-          G.x = i < 7.5 ? signs.x : 0.0;
-          G.y = i < 3.5 ? signs.y : (i > 7.5 ? signs.x : 0.0);
-          G.z = i > 3.5 ? signs.y : 0.0;
-          return G;
+        // perlin simplex from: https://github.com/stegu/webgl-noise/blob/master/src/noise2D.glsl
+        vec3 mod289(vec3 x) {
+        return x - floor(x * (1.0 / 289.0)) * 289.0;
         }
 
-        float pnoise(vec3 p)
-        {
-          vec3 pi0 = floor(p);
-          vec3 uvw = p - pi0;
-          vec3 weights = pweights(uvw);
+        vec2 mod289(vec2 x) {
+        return x - floor(x * (1.0 / 289.0)) * 289.0;
+        }
 
-          float noise_sum = 0.0;
-          for(float i = 0.0; i < 7.5; ++i)
-          {
-            vec3 corner = mod(vec3(i, floor(i*0.5), floor(i*0.25)), 2.0);
-            vec3 pi = pi0 + corner;
-            vec3 w = mix(1.0 - weights, weights, step(0.5, corner));
-            float d = dot(uvw - corner, gradient(get_index(pi)));
-            noise_sum += w.x*w.y*w.z*d;
-          }
-          return noise_sum;
+        vec3 permute(vec3 x) {
+        return mod289(((x*34.0)+1.0)*x);
         }
-        float pnoisenorm(vec3 point)
+
+        float snoise(vec2 v)
         {
-            return pnoise(point) * 0.5 + 0.5; 
+        const vec4 C = vec4(0.211324865405187,  // (3.0-sqrt(3.0))/6.0
+                          0.366025403784439,  // 0.5*(sqrt(3.0)-1.0)
+                         -0.577350269189626,  // -1.0 + 2.0 * C.x
+                          0.024390243902439); // 1.0 / 41.0
+        // First corner
+        vec2 i  = floor(v + dot(v, C.yy) );
+        vec2 x0 = v -   i + dot(i, C.xx);
+
+        // Other corners
+        vec2 i1;
+        //i1.x = step( x0.y, x0.x ); // x0.x > x0.y ? 1.0 : 0.0
+        //i1.y = 1.0 - i1.x;
+        i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
+        // x0 = x0 - 0.0 + 0.0 * C.xx ;
+        // x1 = x0 - i1 + 1.0 * C.xx ;
+        // x2 = x0 - 1.0 + 2.0 * C.xx ;
+        vec4 x12 = x0.xyxy + C.xxzz;
+        x12.xy -= i1;
+
+        // Permutations
+        i = mod289(i); // Avoid truncation effects in permutation
+        vec3 p = permute( permute( i.y + vec3(0.0, i1.y, 1.0 ))
+            + i.x + vec3(0.0, i1.x, 1.0 ));
+
+        vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy), dot(x12.zw,x12.zw)), 0.0);
+        m = m*m ;
+        m = m*m ;
+
+        // Gradients: 41 points uniformly over a line, mapped onto a diamond.
+        // The ring size 17*17 = 289 is close to a multiple of 41 (41*7 = 287)
+
+        vec3 x = 2.0 * fract(p * C.www) - 1.0;
+        vec3 h = abs(x) - 0.5;
+        vec3 ox = floor(x + 0.5);
+        vec3 a0 = x - ox;
+
+        // Normalise gradients implicitly by scaling m
+        // Approximation of: m *= inversesqrt( a0*a0 + h*h );
+        m *= 1.79284291400159 - 0.85373472095314 * ( a0*a0 + h*h );
+
+        // Compute final noise value at P
+        vec3 g;
+        g.x  = a0.x  * x0.x  + h.x  * x0.y;
+        g.yz = a0.yz * x12.xz + h.yz * x12.yw;
+        return 130.0 * dot(m, g);
         }
-        float fbm(vec3 point, float H)
+        // End Perlin
+ 
+        float pnoisenorm(vec2 point)
+        {
+            return snoise(point) * 0.5 + 0.5; 
+        }
+        float fbm(vec2 point, float H)
         {
             float result = 0.0;
             float max = 0.0;
@@ -247,7 +303,7 @@
         void main()
         {
             const bool use_fbm = true;
-            float delta = use_fbm ? fbm(scale * a_Position.xyz, H) : pnoisenorm(scale * vec3(a_Position.xyz));
+            float delta = use_fbm ? fbm(scale * a_Position.xy, H) : pnoisenorm(scale * a_Position.xy);
             height = delta;
             vec4 transformedPosition = vec4(a_Position.xy, delta, 1);
             gl_Position = P * MV * transformedPosition;

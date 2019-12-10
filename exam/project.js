@@ -170,7 +170,7 @@ function Draw()
     }
 
     window.cameraV = getCameraViewMatrix(sliders.rotation.value);
-    let scaleM = scalem(2, 2, 1);
+    let scaleM = scalem(2, 2, 0.8);
     let MV = mult(cameraV, scaleM);
     let shadowV = getCameraViewMatrix(0);
     let shadowMV = mult(shadowV, scaleM);
