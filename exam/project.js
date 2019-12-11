@@ -100,7 +100,8 @@ function Run()
     LoadObjects();
 
     window.cameraP = perspective(30, 2, 0.1, -2);
-    let angle = 45.0;
+    window.shadowP = perspective(45, 2, 0.1, -2);
+
     let cameraPos = vec3(0, 0, sliders.rotation.value); 
     // up vector takes into account that Z is height
     window.frameBuffer = CreateFrameBufferObject(gl, 512, 512);
@@ -159,7 +160,7 @@ function DrawShadowmap(MV, P)
 
 function Draw()
 {
-    // Update light position (static)
+    // Update light position (static, can be preprocessed)
     let lightDir = subtract(getCameraPosition(0), vec3(1.0, 1.0, 0.5));
     gl.uniform3fv(terrainProgram.lightPosition, lightDir);
 
@@ -174,8 +175,8 @@ function Draw()
     let MV = mult(cameraV, scaleM);
     let shadowV = getCameraViewMatrix(0);
     let shadowMV = mult(shadowV, scaleM);
-    DrawShadowmap(shadowMV, cameraP);
-    let shadowMVP = mult(cameraP, shadowMV);
+    DrawShadowmap(shadowMV, shadowP);
+    let shadowMVP = mult(shadowP, shadowMV);
     DrawScene(MV, cameraP, shadowMVP);
     window.requestAnimationFrame(Draw);
 }
