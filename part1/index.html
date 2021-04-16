@@ -14,6 +14,15 @@
         display: flex;
         flex-direction: row;
         flex-wrap: wrap;
+        justify-content: center;
+    }
+    .footer {
+        display: flex;
+        padding-top: 8px;
+        height: 100%;
+        align-items: flex-end;
+        justify-content: space-between;
+        flex-direction: row;
     }
     .flex-column {
         display: flex;
@@ -25,8 +34,12 @@
         border-width: 2px;
         max-width:220px;
     }
+    .top-nav {
+        font-size: large;
+    }
 </style>
 <body>
+    <a class="top-nav" href="#">previous</a><a class="top-nav" style="float: right;" href="#">next</a>
     <div class="flex-container">
         <div class="flex-column">
             <div>
@@ -36,7 +49,11 @@
             <div>
                 This is simply a WebGL canvas that has been cleared to red.
                 
-                You can see the code <a href="code.js">here</a>.
+            </div>
+            <div class="footer">
+                <a href="code.js">
+                    Code
+                </a>
             </div>
         </div>
         <div class="flex-column">
@@ -47,7 +64,9 @@
             <div>
                 This time the canvas is cleared with a black color, causing the background to be black. Three vertices are additionally drawn using the POINTS primitive.
 
-                You can see the code <a href=code01ps2.js>here</a>.
+            </div>
+            <div class="footer">
+                <a href=code01p2.js>Code</a>.
             </div>
         </div>
         <div class="flex-column">
@@ -57,7 +76,9 @@
             </div>
             <div>
                 This is drawn using three vertices again, but this time using the TRIANGLE_STRIP primitive. Each vertex has been assigned a color and shows the interpolation of color between vertices. 
-                You can see the code <a href=code01ps3.js>here</a>.
+            </div>
+            <div class="footer">
+                <a href=code01p3.js>Code</a>.
             </div>
         </div>
         
@@ -71,6 +92,12 @@
 
                 You can find the code <a href=code01p4.js>here</a> and the shader <a href="w01p4.html">here</a>.
             </div>
+            <div class="footer">
+                <a href=code01p4.js>Code</a>
+                <div>
+                    <a href=w01p4.html>Shader</a>
+                </div>
+            </div>
         </div>
         <div class="flex-column">
            <div>
@@ -80,8 +107,13 @@
            <div>
                There are no circles in 3D so this example creates a lot of small triangles(256 to be exact), giving the illusion of a circle. The triangles all share one green vertex in the middle, causing the "glow" effect. Where the previous example rotated, this one moves by updating the position every frame. 
 
-                You can find the code <a href=code01p5.js>here</a> and the shader <a href="w01p5.html">here</a>.
            </div>
+            <div class="footer">
+                <a href=code01p5.js>Code</a>
+                <div>
+                    <a href=w01p5.html>Shader</a>
+                </div>
+            </div>
         </div>
     </div>
 </body>
