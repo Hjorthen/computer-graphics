@@ -1,0 +1,86 @@
+<head>
+
+</head>
+<style>
+    .exercise-1 {
+        width:220px;
+        height:220px;
+        border: 0px;
+    }
+    .embedded-small {
+    }
+
+    .flex-container {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+    .flex-column {
+        display: flex;
+        flex-direction: column;
+        border-style: inset;
+        border-radius: 5px;
+        padding: 10px;
+        margin: 5px;
+        border-width: 2px;
+        max-width:220px;
+    }
+</style>
+<body>
+    <div class="flex-container">
+        <div class="flex-column">
+            <div>
+                <iframe class="exercise-1" src="w01p1.html" title="What does title do">
+                </iframe>
+            </div>
+            <div>
+                This is simply a WebGL canvas that has been cleared to red.
+                
+                You can see the code <a href="code.js">here</a>.
+            </div>
+        </div>
+        <div class="flex-column">
+            <div>
+                <iframe class="exercise-1" src="w01p2.html" title="What does title do">
+                </iframe>
+            </div>
+            <div>
+                This time the canvas is cleared with a black color, causing the background to be black. Three vertices are additionally drawn using the POINTS primitive.
+
+                You can see the code <a href=code01ps2.js>here</a>.
+            </div>
+        </div>
+        <div class="flex-column">
+            <div>
+                <iframe class="exercise-1" src="w01p3.html" title="What does title do">
+                </iframe>
+            </div>
+            <div>
+                This is drawn using three vertices again, but this time using the TRIANGLE_STRIP primitive. Each vertex has been assigned a color and shows the interpolation of color between vertices. 
+            </div>
+        </div>
+        
+        <div class="flex-column">
+            <div>
+                <iframe class="exercise-1" src="w01p4.html" title="What does title do">
+                </iframe>
+            </div>
+            <div>
+                This example uses four vertices to create a quad. This is also the first time using a custom shader which makes use of a uniform attribute that is updated every frame to make the render rotate.
+
+                You can find the code <a href=code01p4.js>here</a> and the shader <a href="w01p4.html">here</a>.
+            </div>
+        </div>
+        <div class="flex-column">
+           <div>
+            <iframe class="exercise-1" src="w01p5.html" title="What does title do">
+            </iframe>
+           </div> 
+           <div>
+               There are no circles in 3D so this example creates a lot of small triangles(256 to be exact), giving the illusion of a circle. The triangles all share one green vertex in the middle, causing the "glow" effect. Where the previous example rotated, this one moves by updating the position every frame. 
+
+                You can find the code <a href=code01p5.js>here</a> and the shader <a href="w01p5.html">here</a>.
+           </div>
+        </div>
+    </div>
+</body>
