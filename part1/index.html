@@ -1,49 +1,25 @@
 <head>
-
+<link rel="stylesheet" href="../content.css">
 </head>
 <style>
-    .exercise-1 {
+    .iframe-width {
         width:220px;
         height:220px;
         border: 0px;
     }
-    .embedded-small {
-    }
 
-    .flex-container {
-        display: flex;
-        flex-direction: row;
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-    .footer {
-        display: flex;
-        padding-top: 8px;
-        height: 100%;
-        align-items: flex-end;
-        justify-content: space-between;
-        flex-direction: row;
-    }
     .flex-column {
         display: flex;
         flex-direction: column;
-        border-style: inset;
-        border-radius: 5px;
-        padding: 10px;
-        margin: 5px;
-        border-width: 2px;
-        max-width:220px;
-    }
-    .top-nav {
-        font-size: large;
+        max-width: 220px;
     }
 </style>
 <body>
-    <a class="top-nav" href="#">previous</a><a class="top-nav" style="float: right;" href="#">next</a>
+    <a class="top-nav" href="../">home</a><a class="top-nav" style="float: right;" href="../part2/">next</a>
     <div class="flex-container">
-        <div class="flex-column">
+        <div class="flex-column add-border card-spacing" style="max-width: 220px;">
             <div>
-                <iframe class="exercise-1" src="w01p1.html" title="What does title do">
+                <iframe class="iframe-width" src="w01p1.html" title="What does title do">
                 </iframe>
             </div>
             <div>
@@ -56,9 +32,9 @@
                 </a>
             </div>
         </div>
-        <div class="flex-column">
+        <div class="flex-column add-border card-spacing">
             <div>
-                <iframe class="exercise-1" src="w01p2.html" title="What does title do">
+                <iframe class="iframe-width" src="w01p2.html" title="What does title do">
                 </iframe>
             </div>
             <div>
@@ -69,9 +45,9 @@
                 <a href=code01p2.js>Code</a>.
             </div>
         </div>
-        <div class="flex-column">
+        <div class="flex-column add-border card-spacing">
             <div>
-                <iframe class="exercise-1" src="w01p3.html" title="What does title do">
+                <iframe class="iframe-width" src="w01p3.html" title="What does title do">
                 </iframe>
             </div>
             <div>
@@ -82,15 +58,15 @@
             </div>
         </div>
         
-        <div class="flex-column">
+        <div class="flex-column add-border card-spacing">
             <div>
-                <iframe class="exercise-1" src="w01p4.html" title="What does title do">
+                <iframe class="iframe-width" src="w01p4.html" title="What does title do">
                 </iframe>
             </div>
             <div>
-                This example uses four vertices to create a quad. This is also the first time using a custom shader which makes use of a uniform attribute that is updated every frame to make the render rotate.
+                This example uses four vertices to create a quad. This is also the first time using a custom shader which makes use of a uniform attribute that is updated every frame to make the render rotate. All shader code is embedded in the html file.
 
-                You can find the code <a href=code01p4.js>here</a> and the shader <a href="w01p4.html">here</a>.
+                You ca
             </div>
             <div class="footer">
                 <a href=code01p4.js>Code</a>
@@ -99,9 +75,9 @@
                 </div>
             </div>
         </div>
-        <div class="flex-column">
+        <div class="flex-column add-border card-spacing">
            <div>
-            <iframe class="exercise-1" src="w01p5.html" title="What does title do">
+            <iframe class="iframe-width" src="w01p5.html" title="What does title do">
             </iframe>
            </div> 
            <div>

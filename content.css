@@ -1,0 +1,26 @@
+.flex-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+.footer {
+    display: flex;
+    padding-top: 8px;
+    height: 100%;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-direction: row;
+}
+.add-border {
+    border-style: inset;
+    border-radius: 5px;
+    border-width: 2px;
+}
+.card-spacing {
+    padding: 10px;
+    margin: 5px;
+}
+.top-nav {
+    font-size: large;
+}

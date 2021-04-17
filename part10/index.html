@@ -1,0 +1,42 @@
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="../content.css">
+</head>
+<style>
+    .iframe-width {
+        width:630px;
+        height:400px;
+        border: 0px;
+    }
+
+    .flex-column {
+        display: flex;
+        flex-direction: column;
+        max-width: 620px;
+    }
+</style>
+<body>
+    <a class="top-nav" href="../part9">previous</a>
+    <div class="flex-container">
+        <div class="flex-column add-border card-spacing" class=".iframe-width">
+            <div>
+                <iframe class="iframe-width" src="project.html" title="What does title do">
+                </iframe>
+            </div>
+            <div>
+                Noise-based terrain generated using simplex noise and fractional brownian motion.
+            </div>
+            <div class="footer">
+                <a href="project.js">
+                    Code
+                </a>
+                <a href="terrain.pdf">
+                    whitepaper
+                </a>
+                <a href="project.html">
+                    Shader
+                </a> 
+            </div>
+        </div>
+    </div>
+</body>
